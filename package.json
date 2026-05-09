@@ -15,5 +15,11 @@
   "type": "module",
   "devDependencies": {
     "turbo": "^2.9.10"
+  },
+  "pnpm": {
+    "overrides": {
+      "vite": "6.4.2"
+    },
+    "onlyBuiltDependencies": ["@swc/core"]
   }
 }

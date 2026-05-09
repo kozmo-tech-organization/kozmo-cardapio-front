@@ -1,21 +1,37 @@
-import "./App.css";
-import { Button } from "@repo/ui";
-import type { Teste } from '@repo/schemas/';
+import { Routes, Route, Navigate } from 'react-router'
+import {
+  LoginPage,
+  RegisterPage,
+  AdminLayout,
+  DashboardPage,
+  RestaurantSettingsPage,
+  ProductsPage,
+  MenuPage,
+  ProtectedRoute,
+} from '@repo/features'
 
-function App() {
-  const nomes: Teste[] = [
-    { name: 'denisson' },
-    { name: 'pereira '}
-  ]
-
+export default function App() {
   return (
-    <div>
-      <Button />
-      {nomes.map((item) => (
-        <p>{item.name}</p>
-      ))}
-    </div>
-  );
-}
+    <Routes>
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/menu/:slug" element={<MenuPage />} />
 
-export default App;
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
+        <Route index element={<DashboardPage />} />
+        <Route path="products" element={<ProductsPage />} />
+        <Route path="settings" element={<RestaurantSettingsPage />} />
+      </Route>
+
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  )
+}

@@ -1,0 +1,29 @@
+{
+  "name": "@repo/queries",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "echo 'building queries'"
+  },
+  "dependencies": {
+    "@repo/schemas": "workspace:*",
+    "@repo/server": "workspace:*",
+    "@tanstack/react-query": "^5.80.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.6",
+    "typescript": "^5.8.3"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}
