@@ -1,5 +1,6 @@
 export * from './auth'
 export * from './admin'
 export * from './menu'
+export * from './landing/LandingPage'
 export * from './shared/AuthProvider'
 export * from './shared/ProtectedRoute'

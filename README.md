@@ -35,7 +35,7 @@ cd kozmo-cardapio-front
 pnpm install
 
 # 2. Suba o banco de dados
-docker-compose up -d
+docker compose up -d
 
 # 3. Backend (porta 3001) — abre em um terminal
 pnpm --filter @repo/api dev

@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router'
 import {
+  LandingPage,
   LoginPage,
   RegisterPage,
   AdminLayout,
@@ -13,7 +14,7 @@ import {
 export default function App() {
   return (
     <Routes>
-      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="/" element={<LandingPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/menu/:slug" element={<MenuPage />} />
@@ -31,7 +32,7 @@ export default function App() {
         <Route path="settings" element={<RestaurantSettingsPage />} />
       </Route>
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }
