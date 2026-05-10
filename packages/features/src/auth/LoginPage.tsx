@@ -32,7 +32,7 @@ export function LoginPage() {
               <path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7" />
             </svg>
           </div>
-          <h1 className="text-xl font-bold text-gray-900">Kozmo</h1>
+          <h1 className="text-xl font-bold text-gray-900">Kozmo Cardápio Digital</h1>
           <p className="text-sm text-gray-500">Entre na sua conta</p>
         </div>
 
