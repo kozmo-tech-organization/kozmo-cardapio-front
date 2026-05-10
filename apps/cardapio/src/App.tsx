@@ -8,6 +8,7 @@ import {
   RestaurantSettingsPage,
   ProductsPage,
   CategoriesPage,
+  ViewMenuPage,
   MenuPage,
   ProtectedRoute,
 } from '@repo/features'
@@ -31,6 +32,7 @@ export default function App() {
         <Route index element={<DashboardPage />} />
         <Route path="products" element={<ProductsPage />} />
         <Route path="categories" element={<CategoriesPage />} />
+        <Route path="visualizar" element={<ViewMenuPage />} />
         <Route path="settings" element={<RestaurantSettingsPage />} />
       </Route>
 

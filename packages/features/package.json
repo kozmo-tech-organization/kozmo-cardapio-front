@@ -28,9 +28,10 @@
   "dependencies": {
     "@repo/queries": "workspace:*",
     "@repo/schemas": "workspace:*",
-    "@repo/ui": "workspace:*",
     "@repo/server": "workspace:*",
+    "@repo/ui": "workspace:*",
     "@tanstack/react-query": "^5.80.7",
+    "qrcode.react": "^4.2.0",
     "react-router": "^7.6.2"
   },
   "devDependencies": {

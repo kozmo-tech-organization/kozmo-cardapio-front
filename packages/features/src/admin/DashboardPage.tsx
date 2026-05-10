@@ -34,7 +34,6 @@ export function DashboardPage() {
   const products = menu?.products ?? []
 
   const inStockCount = products.filter((p) => p.inStock).length
-  const outOfStockCount = products.length - inStockCount
 
   const allReviews = products.flatMap((p) => p.reviews ?? [])
   const totalReviews = allReviews.length
