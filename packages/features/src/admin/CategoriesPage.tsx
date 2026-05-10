@@ -7,7 +7,7 @@ import {
   useSetCategoryProducts,
   useProducts,
 } from '@repo/queries'
-import { Button, Card, CardContent, FormField } from '@repo/ui'
+import { Button, Card, CardContent, FormField, Input } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'
 import type { Category, CreateCategoryInput } from '@repo/schemas'
 
@@ -34,6 +34,8 @@ export function CategoriesPage() {
   const [managingCategory, setManagingCategory] = useState<Category | null>(null)
   const [form, setForm] = useState<CreateCategoryInput>(emptyForm)
   const [selectedProductIds, setSelectedProductIds] = useState<Set<string>>(new Set())
+  const [categorySearch, setCategorySearch] = useState('')
+  const [productSearch, setProductSearch] = useState('')
 
   function setField(field: string, value: any) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -171,6 +173,9 @@ export function CategoriesPage() {
 
   if (view === 'products' && managingCategory) {
     const count = selectedProductIds.size
+    const filteredCategoryProducts = productSearch.trim()
+      ? products?.filter((p) => p.name.toLowerCase().includes(productSearch.toLowerCase()))
+      : products
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -198,8 +203,14 @@ export function CategoriesPage() {
           </Card>
         ) : (
           <div className="space-y-4">
+            <Input
+              value={productSearch}
+              onChange={(e) => setProductSearch(e.target.value)}
+              placeholder={t('admin.categories.products.search')}
+              className="max-w-sm"
+            />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-              {products.map((product) => {
+              {filteredCategoryProducts?.map((product) => {
                 const selected = selectedProductIds.has(product.id)
                 return (
                   <button
@@ -257,6 +268,10 @@ export function CategoriesPage() {
     )
   }
 
+  const filteredCategories = categorySearch.trim()
+    ? categories?.filter((c) => c.title.toLowerCase().includes(categorySearch.toLowerCase()))
+    : categories
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -281,8 +296,21 @@ export function CategoriesPage() {
           </CardContent>
         </Card>
       ) : (
+        <>
+        <Input
+          value={categorySearch}
+          onChange={(e) => setCategorySearch(e.target.value)}
+          placeholder={t('admin.categories.search')}
+        />
+        {filteredCategories?.length === 0 ? (
+          <Card>
+            <CardContent className="p-12 text-center">
+              <p className="text-muted-foreground">{t('admin.categories.noResults', { query: categorySearch })}</p>
+            </CardContent>
+          </Card>
+        ) : (
         <div className="space-y-3">
-          {categories?.map((category) => (
+          {filteredCategories?.map((category) => (
             <Card key={category.id}>
               <CardContent className="p-4">
                 <div className="flex items-center gap-4">
@@ -337,6 +365,8 @@ export function CategoriesPage() {
             </Card>
           ))}
         </div>
+        )}
+        </>
       )}
     </div>
   )

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@repo/queries'
-import { Button, Card, CardContent, Badge, FormField, Label } from '@repo/ui'
+import { Button, Card, CardContent, Badge, FormField, Label, Input } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'
 import type { Product, CreateProductInput } from '@repo/schemas'
 
@@ -23,6 +23,7 @@ export function ProductsPage() {
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [form, setForm] = useState<CreateProductInput>(emptyForm)
+  const [search, setSearch] = useState('')
 
   function setField(field: string, value: any) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -65,6 +66,10 @@ export function ProductsPage() {
 
   const isPending = createProduct.isPending || updateProduct.isPending
 
+  const filteredProducts = search.trim()
+    ? products?.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
+    : products
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -74,6 +79,14 @@ export function ProductsPage() {
         </div>
         <Button onClick={openCreate}>{t('admin.products.new')}</Button>
       </div>
+
+      {!showForm && (
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('admin.products.search')}
+        />
+      )}
 
       {showForm && (
         <Card>
@@ -158,9 +171,15 @@ export function ProductsPage() {
             <Button className="mt-4" onClick={openCreate}>{t('admin.products.addFirst')}</Button>
           </CardContent>
         </Card>
+      ) : filteredProducts?.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <p className="text-muted-foreground">{t('admin.products.noResults', { query: search })}</p>
+          </CardContent>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {products?.map((product) => (
+          {filteredProducts?.map((product) => (
             <Card key={product.id}>
               {product.imageUrl && (
                 <img
