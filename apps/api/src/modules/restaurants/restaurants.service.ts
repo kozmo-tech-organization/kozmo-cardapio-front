@@ -29,6 +29,7 @@ export class RestaurantsService {
     if (input.name !== undefined) restaurant.name = input.name
     if (input.logoUrl !== undefined) restaurant.logoUrl = input.logoUrl
     if (input.bannerUrl !== undefined) restaurant.bannerUrl = input.bannerUrl
+    if (input.whatsappPhone !== undefined) restaurant.whatsappPhone = input.whatsappPhone
     if (input.theme) {
       restaurant.theme = { ...restaurant.theme, ...input.theme }
     }
@@ -45,6 +46,7 @@ export class RestaurantsService {
       theme: restaurant.theme,
       logoUrl: restaurant.logoUrl,
       bannerUrl: restaurant.bannerUrl,
+      whatsappPhone: restaurant.whatsappPhone ?? null,
       createdAt: restaurant.createdAt.toISOString(),
       updatedAt: restaurant.updatedAt.toISOString(),
     }

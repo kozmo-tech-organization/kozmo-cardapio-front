@@ -15,6 +15,7 @@ export const RestaurantSchema = z.object({
   theme: ThemeSchema,
   logoUrl: z.string().url().nullable(),
   bannerUrl: z.string().url().nullable(),
+  whatsappPhone: z.string().nullable(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })
@@ -24,6 +25,7 @@ export const UpdateRestaurantSchema = z.object({
   theme: ThemeSchema.partial().optional(),
   logoUrl: z.string().url().nullable().optional(),
   bannerUrl: z.string().url().nullable().optional(),
+  whatsappPhone: z.string().nullable().optional(),
 })
 
 export type Theme = z.infer<typeof ThemeSchema>

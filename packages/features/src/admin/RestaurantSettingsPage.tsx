@@ -13,6 +13,7 @@ export function RestaurantSettingsPage() {
     accentColor: '#ff6b35',
     logoUrl: '',
     bannerUrl: '',
+    whatsappPhone: '',
   })
   const [saved, setSaved] = useState(false)
 
@@ -25,6 +26,7 @@ export function RestaurantSettingsPage() {
         accentColor: restaurant.theme.accentColor,
         logoUrl: restaurant.logoUrl ?? '',
         bannerUrl: restaurant.bannerUrl ?? '',
+        whatsappPhone: restaurant.whatsappPhone ?? '',
       })
     }
   }, [restaurant])
@@ -44,6 +46,7 @@ export function RestaurantSettingsPage() {
       },
       logoUrl: form.logoUrl || null,
       bannerUrl: form.bannerUrl || null,
+      whatsappPhone: form.whatsappPhone || null,
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
@@ -86,6 +89,13 @@ export function RestaurantSettingsPage() {
               value={form.bannerUrl}
               onChange={(e) => setField('bannerUrl', e.target.value)}
               placeholder="https://..."
+            />
+            <FormField
+              label="Telefone do WhatsApp"
+              type="tel"
+              value={form.whatsappPhone}
+              onChange={(e) => setField('whatsappPhone', e.target.value)}
+              placeholder="5511999999999 (com código do país e DDD)"
             />
           </CardContent>
         </Card>

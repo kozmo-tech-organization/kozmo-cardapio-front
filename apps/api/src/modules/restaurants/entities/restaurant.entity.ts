@@ -39,6 +39,9 @@ export class Restaurant {
   @Column({ nullable: true, type: 'text' })
   bannerUrl: string | null
 
+  @Column({ nullable: true, type: 'varchar' })
+  whatsappPhone: string | null
+
   @OneToMany(() => Product, (product) => product.restaurant)
   products: Product[]
 
