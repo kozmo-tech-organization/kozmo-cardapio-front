@@ -2,7 +2,7 @@ import { Link } from 'react-router'
 
 export function LandingPage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#f7f3ef' }}>
+    <div className="min-h-screen bg-orange-50">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500">
