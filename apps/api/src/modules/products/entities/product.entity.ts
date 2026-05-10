@@ -5,11 +5,13 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
+  ManyToMany,
   OneToMany,
   JoinColumn,
 } from 'typeorm'
 import { Restaurant } from '../../restaurants/entities/restaurant.entity'
 import { Review } from '../../reviews/entities/review.entity'
+import { Category } from '../../categories/entities/category.entity'
 
 @Entity('products')
 export class Product {
@@ -45,6 +47,9 @@ export class Product {
 
   @OneToMany(() => Review, (review) => review.product)
   reviews: Review[]
+
+  @ManyToMany(() => Category, (category) => category.products)
+  categories: Category[]
 
   @CreateDateColumn()
   createdAt: Date

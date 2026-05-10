@@ -13,6 +13,9 @@ import type {
   UpdateProductInput,
   ProductFilters,
   CreateReviewInput,
+  Category,
+  CreateCategoryInput,
+  UpdateCategoryInput,
 } from '@repo/schemas'
 import { getRpcUrl, getAuthHeaders } from './http-client'
 
@@ -55,6 +58,16 @@ export const orpcClient = {
     create: (input: CreateReviewInput): Promise<Review> => rpc.reviews.create(input),
     listByProduct: (input: { productId: string }): Promise<Review[]> =>
       rpc.reviews.listByProduct(input),
+  },
+  categories: {
+    list: (): Promise<Category[]> => rpc.categories.list(),
+    create: (input: CreateCategoryInput): Promise<Category> => rpc.categories.create(input),
+    update: (input: { id: string } & UpdateCategoryInput): Promise<Category> =>
+      rpc.categories.update(input),
+    delete: (input: { id: string }): Promise<{ success: boolean }> =>
+      rpc.categories.delete(input),
+    setProducts: (input: { categoryId: string; productIds: string[] }): Promise<Category> =>
+      rpc.categories.setProducts(input),
   },
 }
 

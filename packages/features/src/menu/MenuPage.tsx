@@ -3,6 +3,7 @@ import { useParams } from 'react-router'
 import { useMenu } from '@repo/queries'
 import { Spinner } from '@repo/ui'
 import { ProductCard } from './ProductCard'
+import type { MenuCategory } from '@repo/schemas'
 
 export function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
@@ -30,12 +31,20 @@ export function MenuPage() {
     )
   }
 
-  const { restaurant, products } = menu
+  const { restaurant, categories, products, uncategorizedProducts } = menu
   const theme = restaurant.theme
 
-  const filtered = search.trim()
-    ? products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
-    : products
+  const query = search.trim().toLowerCase()
+
+  const filteredCategories: MenuCategory[] = query
+    ? []
+    : categories
+
+  const filteredUncategorized = query
+    ? products.filter((p) => p.name.toLowerCase().includes(query))
+    : uncategorizedProducts
+
+  const totalItems = products.length
 
   return (
     <div
@@ -62,7 +71,7 @@ export function MenuPage() {
           )}
           <div>
             <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-            <p className="text-muted-foreground mt-1">{products.length} itens disponíveis</p>
+            <p className="text-muted-foreground mt-1">{totalItems} itens disponíveis</p>
           </div>
         </div>
 
@@ -91,34 +100,81 @@ export function MenuPage() {
           )}
         </div>
 
-        {filtered.length === 0 ? (
-          <div className="rounded-xl border border-border p-12 text-center">
-            {search ? (
-              <>
-                <p className="text-muted-foreground text-lg">
-                  Nenhum item encontrado para "<strong>{search}</strong>".
-                </p>
-                <button onClick={() => setSearch('')} className="mt-3 text-sm text-primary hover:underline">
-                  Limpar busca
-                </button>
-              </>
-            ) : (
-              <p className="text-muted-foreground text-lg">Nenhum item disponível no momento.</p>
+        {query ? (
+          /* Modo busca: exibe todos os produtos filtrados em flat list */
+          filteredUncategorized.length === 0 ? (
+            <div className="rounded-xl border border-border p-12 text-center">
+              <p className="text-muted-foreground text-lg">
+                Nenhum item encontrado para "<strong>{search}</strong>".
+              </p>
+              <button onClick={() => setSearch('')} className="mt-3 text-sm text-primary hover:underline">
+                Limpar busca
+              </button>
+            </div>
+          ) : (
+            <>
+              <p className="mb-4 text-sm text-muted-foreground">
+                {filteredUncategorized.length} resultado{filteredUncategorized.length !== 1 ? 's' : ''} para "{search}"
+              </p>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredUncategorized.map((product) => (
+                  <ProductCard key={product.id} product={product} />
+                ))}
+              </div>
+            </>
+          )
+        ) : (
+          /* Modo normal: categorias + não categorizados */
+          <div className="space-y-10">
+            {filteredCategories.map((category) => (
+              <section key={category.id}>
+                <div className="flex items-center gap-3 mb-4">
+                  {category.imageUrl && (
+                    <img
+                      src={category.imageUrl}
+                      alt={category.title}
+                      className="h-12 w-12 rounded-lg object-cover shrink-0"
+                    />
+                  )}
+                  <div>
+                    <h2 className="text-xl font-bold">{category.title}</h2>
+                    {category.subtitle && (
+                      <p className="text-sm text-muted-foreground">{category.subtitle}</p>
+                    )}
+                  </div>
+                </div>
+
+                {category.products.length === 0 ? (
+                  <p className="text-sm text-muted-foreground">Nenhum item nesta categoria.</p>
+                ) : (
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    {category.products.map((product) => (
+                      <ProductCard key={product.id} product={product} />
+                    ))}
+                  </div>
+                )}
+              </section>
+            ))}
+
+            {uncategorizedProducts.length > 0 && (
+              <section>
+                {categories.length > 0 && (
+                  <h2 className="text-xl font-bold mb-4">Outros</h2>
+                )}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {uncategorizedProducts.map((product) => (
+                    <ProductCard key={product.id} product={product} />
+                  ))}
+                </div>
+              </section>
+            )}
+
+            {categories.length === 0 && uncategorizedProducts.length === 0 && (
+              <div className="rounded-xl border border-border p-12 text-center">
+                <p className="text-muted-foreground text-lg">Nenhum item disponível no momento.</p>
+              </div>
             )}
           </div>
-        ) : (
-          <>
-            {search && (
-              <p className="mb-4 text-sm text-muted-foreground">
-                {filtered.length} resultado{filtered.length !== 1 ? 's' : ''} para "{search}"
-              </p>
-            )}
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))}
-            </div>
-          </>
         )}
 
         <footer className="mt-12 text-center text-xs text-muted-foreground">

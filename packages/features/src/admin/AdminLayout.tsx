@@ -5,6 +5,7 @@ import { Button } from '@repo/ui'
 const navItems = [
   { to: '/admin', label: 'Dashboard', exact: true },
   { to: '/admin/products', label: 'Produtos' },
+  { to: '/admin/categories', label: 'Categorias' },
   { to: '/admin/settings', label: 'Configurações' },
 ]
 
