@@ -67,47 +67,71 @@ export function DashboardPage() {
         <p className="text-muted-foreground mt-1">Gerencie seu cardápio digital em um só lugar</p>
       </div>
 
-      {/* Métricas */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Produtos</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{products.length}</p>
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Produtos</p>
+              <p className="text-3xl font-bold">{products.length}</p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                <path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z" />
+                <path d="m3.3 7 8.7 5 8.7-5" />
+                <path d="M12 22V12" />
+              </svg>
+            </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Em estoque</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold text-green-600">{inStockCount}</p>
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Em estoque</p>
+              <p className="text-3xl font-bold text-green-600">{inStockCount}</p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+                <path d="m9 12 2 2 4-4" />
+              </svg>
+            </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Avaliações</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-3xl font-bold">{totalReviews}</p>
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Avaliações</p>
+              <p className="text-3xl font-bold">{totalReviews}</p>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500 dark:bg-orange-900/30 dark:text-orange-400">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+              </svg>
+            </div>
           </CardContent>
         </Card>
+
         <Card>
-          <CardHeader className="pb-1">
-            <CardTitle className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Nota média</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-baseline gap-1">
-              <p className="text-3xl font-bold">{globalAvg > 0 ? globalAvg.toFixed(1) : '—'}</p>
-              {globalAvg > 0 && <span className="text-yellow-400 text-lg">★</span>}
+          <CardContent className="p-5 flex items-center justify-between">
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Nota média</p>
+              <div className="flex items-baseline gap-1">
+                <p className="text-3xl font-bold">{globalAvg > 0 ? globalAvg.toFixed(1) : '—'}</p>
+                {globalAvg > 0 && <span className="text-yellow-400 text-lg">★</span>}
+              </div>
+            </div>
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-violet-100 text-violet-600 dark:bg-violet-900/30 dark:text-violet-400">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
             </div>
           </CardContent>
         </Card>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* Distribuição de notas */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Distribuição de avaliações</CardTitle>
@@ -128,7 +152,6 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Produtos mais bem avaliados */}
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Produtos mais bem avaliados</CardTitle>
@@ -167,7 +190,6 @@ export function DashboardPage() {
         </Card>
       </div>
 
-      {/* Avaliações recentes */}
       {recentReviews.length > 0 && (
         <Card>
           <CardHeader>
@@ -199,7 +221,6 @@ export function DashboardPage() {
         </Card>
       )}
 
-      {/* Ações rápidas + link */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardContent className="p-5">
