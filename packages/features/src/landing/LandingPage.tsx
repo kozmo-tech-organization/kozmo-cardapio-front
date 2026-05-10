@@ -10,7 +10,7 @@ export function LandingPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
             </svg>
           </div>
-          <span className="text-lg font-bold tracking-tight">MenuPro</span>
+          <span className="text-lg font-bold tracking-tight">Kozmo</span>
         </div>
         <Link
           to="/login"

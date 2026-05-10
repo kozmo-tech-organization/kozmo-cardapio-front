@@ -178,7 +178,7 @@ export function MenuPage() {
         )}
 
         <footer className="mt-12 text-center text-xs text-muted-foreground">
-          Cardápio digital por <span className="font-medium">MenuPro</span>
+          Cardápio digital por <span className="font-medium">Kozmo</span>
         </footer>
       </div>
     </div>
