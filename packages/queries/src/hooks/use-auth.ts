@@ -12,7 +12,7 @@ export function useLogin() {
     onSuccess: (data) => {
       setAuthToken(data.accessToken)
       localStorage.setItem('access_token', data.accessToken)
-      queryClient.setQueryData(AUTH_KEY, data.restaurant)
+      queryClient.invalidateQueries({ queryKey: AUTH_KEY })
     },
   })
 }
@@ -25,7 +25,7 @@ export function useRegister() {
     onSuccess: (data) => {
       setAuthToken(data.accessToken)
       localStorage.setItem('access_token', data.accessToken)
-      queryClient.setQueryData(AUTH_KEY, data.restaurant)
+      queryClient.invalidateQueries({ queryKey: AUTH_KEY })
     },
   })
 }

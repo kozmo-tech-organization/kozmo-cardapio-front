@@ -17,7 +17,7 @@ export function RestaurantSettingsPage() {
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
-    if (restaurant) {
+    if (restaurant?.theme) {
       setForm({
         name: restaurant.name,
         primaryColor: restaurant.theme.primaryColor,
@@ -47,6 +47,10 @@ export function RestaurantSettingsPage() {
     })
     setSaved(true)
     setTimeout(() => setSaved(false), 3000)
+  }
+
+  if (!restaurant?.theme) {
+    return <p className="text-muted-foreground text-sm">Carregando configurações...</p>
   }
 
   return (
