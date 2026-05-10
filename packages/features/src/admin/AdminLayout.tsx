@@ -70,14 +70,13 @@ export function AdminLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-slate-50">
       <header className="bg-orange-500 shadow-md">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             <div className="flex items-center gap-8">
               <span className="font-bold text-lg text-white tracking-wide">Kozmo</span>
 
-              {/* Nav desktop */}
               <nav className="hidden items-center gap-1 sm:flex">
                 {navItems.map((item) => {
                   const active = isActive(item)
@@ -112,7 +111,6 @@ export function AdminLayout() {
                 Sair
               </Button>
 
-              {/* Botão hamburguer — só mobile */}
               <button
                 onClick={() => setMobileOpen((v) => !v)}
                 aria-label="Menu"
@@ -134,7 +132,6 @@ export function AdminLayout() {
           </div>
         </div>
 
-        {/* Menu mobile */}
         {mobileOpen && (
           <div className="sm:hidden border-t border-white/20 bg-orange-500 px-4 pb-4 pt-2">
             <nav className="flex flex-col gap-1">
