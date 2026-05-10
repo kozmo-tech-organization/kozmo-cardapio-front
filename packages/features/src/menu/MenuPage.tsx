@@ -2,11 +2,58 @@ import { useState } from 'react'
 import { useParams } from 'react-router'
 import { useMenu } from '@repo/queries'
 import { Spinner } from '@repo/ui'
+import { useTranslation, type Language } from '@repo/i18n'
 import { ProductCard } from './ProductCard'
 import type { MenuCategory } from '@repo/schemas'
 
+const LANG_FLAGS: Record<Language, string> = { pt: '🇧🇷', en: '🇺🇸', es: '🇪🇸' }
+const LANG_LABELS: Record<Language, string> = { pt: 'PT', en: 'EN', es: 'ES' }
+
+function LanguageSelector() {
+  const { lang, setLang, t } = useTranslation()
+  const [open, setOpen] = useState(false)
+
+  return (
+    <div
+      className="relative shrink-0"
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) setOpen(false)
+      }}
+    >
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-1.5 rounded-full border border-border bg-background px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+      >
+        <span>{LANG_FLAGS[lang]}</span>
+        <span>{LANG_LABELS[lang]}</span>
+        <svg className="h-3 w-3 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-1 w-36 rounded-lg bg-background shadow-lg ring-1 ring-border overflow-hidden z-50">
+          {(['pt', 'en', 'es'] as Language[]).map((l) => (
+            <button
+              key={l}
+              onClick={() => { setLang(l); setOpen(false) }}
+              className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors hover:bg-muted ${
+                lang === l ? 'bg-muted text-primary font-medium' : 'text-foreground'
+              }`}
+            >
+              <span>{LANG_FLAGS[l]}</span>
+              <span>{t(`lang.${l}`)}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function WhatsAppWidget({ phone }: { phone: string }) {
   const [open, setOpen] = useState(false)
+  const { t } = useTranslation()
 
   const phoneDigits = phone.replace(/\D/g, '')
   const whatsappUrl = `https://wa.me/${phoneDigits}`
@@ -20,8 +67,8 @@ function WhatsAppWidget({ phone }: { phone: string }) {
               🤖
             </div>
             <div>
-              <p className="text-sm font-semibold text-white">Assistente</p>
-              <p className="text-xs text-white/80">Online agora</p>
+              <p className="text-sm font-semibold text-white">{t('menu.whatsapp.assistant')}</p>
+              <p className="text-xs text-white/80">{t('menu.whatsapp.online')}</p>
             </div>
           </div>
           <div className="px-4 py-4 space-y-4">
@@ -30,7 +77,7 @@ function WhatsAppWidget({ phone }: { phone: string }) {
                 🤖
               </div>
               <div className="rounded-2xl rounded-tl-none bg-gray-100 px-3 py-2 text-sm text-gray-800">
-                Olá! Gostaria de falar com o estabelecimento via WhatsApp?
+                {t('menu.whatsapp.question')}
               </div>
             </div>
             <div className="flex gap-2 justify-end">
@@ -38,7 +85,7 @@ function WhatsAppWidget({ phone }: { phone: string }) {
                 onClick={() => setOpen(false)}
                 className="rounded-full border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors"
               >
-                Não
+                {t('menu.whatsapp.no')}
               </button>
               <a
                 href={whatsappUrl}
@@ -46,7 +93,7 @@ function WhatsAppWidget({ phone }: { phone: string }) {
                 rel="noopener noreferrer"
                 className="rounded-full bg-[#25D366] px-4 py-1.5 text-sm font-medium text-white hover:bg-[#1ebe5d] transition-colors"
               >
-                Sim
+                {t('menu.whatsapp.yes')}
               </a>
             </div>
           </div>
@@ -55,7 +102,7 @@ function WhatsAppWidget({ phone }: { phone: string }) {
 
       <button
         onClick={() => setOpen((v) => !v)}
-        aria-label="Falar pelo WhatsApp"
+        aria-label={t('menu.whatsapp.ariaLabel')}
         className="flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] shadow-lg hover:bg-[#1ebe5d] transition-colors"
       >
         <svg viewBox="0 0 24 24" className="h-7 w-7 fill-white">
@@ -69,6 +116,7 @@ function WhatsAppWidget({ phone }: { phone: string }) {
 export function MenuPage() {
   const { slug } = useParams<{ slug: string }>()
   const { data: menu, isLoading, isError } = useMenu(slug ?? '')
+  const { t } = useTranslation()
   const [search, setSearch] = useState('')
 
   if (isLoading) {
@@ -83,9 +131,9 @@ export function MenuPage() {
     return (
       <div className="flex min-h-screen items-center justify-center p-4 text-center">
         <div>
-          <h1 className="text-2xl font-bold">Cardápio não encontrado</h1>
+          <h1 className="text-2xl font-bold">{t('menu.notFound.title')}</h1>
           <p className="text-muted-foreground mt-2">
-            Este link de cardápio não existe ou foi removido.
+            {t('menu.notFound.subtitle')}
           </p>
         </div>
       </div>
@@ -97,9 +145,7 @@ export function MenuPage() {
 
   const query = search.trim().toLowerCase()
 
-  const filteredCategories: MenuCategory[] = query
-    ? []
-    : categories
+  const filteredCategories: MenuCategory[] = query ? [] : categories
 
   const filteredUncategorized = query
     ? products.filter((p) => p.name.toLowerCase().includes(query))
@@ -122,18 +168,23 @@ export function MenuPage() {
       )}
 
       <div className="mx-auto max-w-4xl px-4 py-8">
-        <div className="mb-6 flex items-center gap-4">
-          {restaurant.logoUrl && (
-            <img
-              src={restaurant.logoUrl}
-              alt={restaurant.name}
-              className="h-16 w-16 rounded-full object-cover border-2 border-border"
-            />
-          )}
-          <div>
-            <h1 className="text-3xl font-bold">{restaurant.name}</h1>
-            <p className="text-muted-foreground mt-1">{totalItems} itens disponíveis</p>
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 min-w-0">
+            {restaurant.logoUrl && (
+              <img
+                src={restaurant.logoUrl}
+                alt={restaurant.name}
+                className="h-16 w-16 rounded-full object-cover border-2 border-border shrink-0"
+              />
+            )}
+            <div className="min-w-0">
+              <h1 className="text-3xl font-bold truncate">{restaurant.name}</h1>
+              <p className="text-muted-foreground mt-1">
+                {t(totalItems !== 1 ? 'menu.items.other' : 'menu.items.one', { count: totalItems })}
+              </p>
+            </div>
           </div>
+          <LanguageSelector />
         </div>
 
         <div className="relative mb-6">
@@ -148,7 +199,7 @@ export function MenuPage() {
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar no cardápio..."
+            placeholder={t('menu.search')}
             className="w-full rounded-xl border border-input bg-background py-2.5 pl-9 pr-4 text-sm shadow-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
           {search && (
@@ -165,16 +216,19 @@ export function MenuPage() {
           filteredUncategorized.length === 0 ? (
             <div className="rounded-xl border border-border p-12 text-center">
               <p className="text-muted-foreground text-lg">
-                Nenhum item encontrado para "<strong>{search}</strong>".
+                {t('menu.noResults', { query: search })}
               </p>
               <button onClick={() => setSearch('')} className="mt-3 text-sm text-primary hover:underline">
-                Limpar busca
+                {t('menu.clearSearch')}
               </button>
             </div>
           ) : (
             <>
               <p className="mb-4 text-sm text-muted-foreground">
-                {filteredUncategorized.length} resultado{filteredUncategorized.length !== 1 ? 's' : ''} para "{search}"
+                {t(
+                  filteredUncategorized.length !== 1 ? 'menu.results.other' : 'menu.results.one',
+                  { count: filteredUncategorized.length, query: search },
+                )}
               </p>
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {filteredUncategorized.map((product) => (
@@ -204,7 +258,7 @@ export function MenuPage() {
                 </div>
 
                 {category.products.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">Nenhum item nesta categoria.</p>
+                  <p className="text-sm text-muted-foreground">{t('menu.categoryEmpty')}</p>
                 ) : (
                   <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {category.products.map((product) => (
@@ -218,7 +272,7 @@ export function MenuPage() {
             {uncategorizedProducts.length > 0 && (
               <section>
                 {categories.length > 0 && (
-                  <h2 className="text-xl font-bold mb-4">Outros</h2>
+                  <h2 className="text-xl font-bold mb-4">{t('menu.others')}</h2>
                 )}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {uncategorizedProducts.map((product) => (
@@ -230,14 +284,14 @@ export function MenuPage() {
 
             {categories.length === 0 && uncategorizedProducts.length === 0 && (
               <div className="rounded-xl border border-border p-12 text-center">
-                <p className="text-muted-foreground text-lg">Nenhum item disponível no momento.</p>
+                <p className="text-muted-foreground text-lg">{t('menu.empty')}</p>
               </div>
             )}
           </div>
         )}
 
         <footer className="mt-12 text-center text-xs text-muted-foreground">
-          Cardápio digital por <span className="font-medium">Kozmo</span>
+          {t('menu.footer')} <span className="font-medium">Kozmo</span>
         </footer>
       </div>
 

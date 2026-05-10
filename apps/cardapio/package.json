@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@repo/features": "workspace:*",
+    "@repo/i18n": "workspace:*",
     "@repo/queries": "workspace:*",
     "@repo/schemas": "workspace:*",
     "@repo/server": "workspace:*",

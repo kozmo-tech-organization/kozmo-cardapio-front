@@ -2,9 +2,11 @@ import { useState } from 'react'
 import { QRCodeSVG } from 'qrcode.react'
 import { useCurrentRestaurant } from '@repo/queries'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 
 export function ViewMenuPage() {
   const { data: restaurant } = useCurrentRestaurant()
+  const { t } = useTranslation()
   const [copied, setCopied] = useState(false)
   const [showQr, setShowQr] = useState(true)
 
@@ -21,14 +23,14 @@ export function ViewMenuPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Visualizar Cardápio</h1>
-        <p className="text-muted-foreground mt-1">Compartilhe seu cardápio com os clientes</p>
+        <h1 className="text-3xl font-bold">{t('admin.viewMenu.title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('admin.viewMenu.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Link do Cardápio</CardTitle>
+            <CardTitle className="text-base">{t('admin.viewMenu.linkTitle')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="rounded-lg border border-border bg-muted/40 px-3 py-2.5 text-sm text-muted-foreground break-all select-all">
@@ -49,7 +51,7 @@ export function ViewMenuPage() {
                     <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" />
                   </svg>
                 )}
-                {copied ? 'Copiado!' : 'Copiar Link'}
+                {copied ? t('admin.viewMenu.copied') : t('admin.viewMenu.copy')}
               </button>
               <a
                 href={menuUrl}
@@ -62,7 +64,7 @@ export function ViewMenuPage() {
                   <path d="M10 14 21 3" />
                   <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                 </svg>
-                Abrir
+                {t('admin.viewMenu.open')}
               </a>
             </div>
           </CardContent>
@@ -70,12 +72,12 @@ export function ViewMenuPage() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-base">QR Code</CardTitle>
+            <CardTitle className="text-base">{t('admin.viewMenu.qrCode')}</CardTitle>
             <button
               onClick={() => setShowQr((v) => !v)}
               className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
             >
-              {showQr ? 'Esconder' : 'Mostrar'} QR Code
+              {showQr ? t('admin.viewMenu.hideQr') : t('admin.viewMenu.showQr')}
             </button>
           </CardHeader>
           <CardContent className="flex justify-center py-4">
@@ -83,7 +85,7 @@ export function ViewMenuPage() {
               <QRCodeSVG value={menuUrl} size={180} />
             ) : (
               <div className="flex h-45 w-45 items-center justify-center rounded-xl border-2 border-dashed border-border text-sm text-muted-foreground">
-                QR Code oculto
+                {t('admin.viewMenu.qrHidden')}
               </div>
             )}
           </CardContent>

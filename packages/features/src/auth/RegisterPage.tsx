@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
 import { useRegister } from '@repo/queries'
 import { Button, FormField } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 
 export function RegisterPage() {
   const navigate = useNavigate()
   const register = useRegister()
+  const { t } = useTranslation()
   const [form, setForm] = useState({ name: '', email: '', password: '' })
   const [error, setError] = useState('')
 
@@ -20,7 +22,7 @@ export function RegisterPage() {
       await register.mutateAsync(form)
       navigate('/admin')
     } catch (err: any) {
-      setError(err?.message ?? 'Erro ao criar conta')
+      setError(err?.message ?? t('auth.register.defaultError'))
     }
   }
 
@@ -36,46 +38,46 @@ export function RegisterPage() {
             </svg>
           </div>
           <h1 className="text-xl font-bold text-gray-900">Kozmo Cardápio Digital</h1>
-          <p className="text-sm text-gray-500">Crie sua conta gratuitamente</p>
+          <p className="text-sm text-gray-500">{t('auth.register.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField
-            label="Nome do restaurante"
+            label={t('auth.register.restaurantName')}
             type="text"
             value={form.name}
             onChange={(e) => setField('name', e.target.value)}
-            placeholder="Pizzaria do João"
+            placeholder={t('auth.register.restaurantNamePlaceholder')}
             required
             minLength={2}
           />
           <FormField
-            label="Email"
+            label={t('auth.register.email')}
             type="email"
             value={form.email}
             onChange={(e) => setField('email', e.target.value)}
-            placeholder="seu@restaurante.com"
+            placeholder={t('auth.register.emailPlaceholder')}
             required
           />
           <FormField
-            label="Senha"
+            label={t('auth.register.password')}
             type="password"
             value={form.password}
             onChange={(e) => setField('password', e.target.value)}
-            placeholder="Mínimo 6 caracteres"
+            placeholder={t('auth.register.passwordPlaceholder')}
             required
             minLength={6}
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" loading={register.isPending}>
-            Criar conta
+            {t('auth.register.submit')}
           </Button>
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-500">
-          Já tem conta?{' '}
+          {t('auth.register.hasAccount')}{' '}
           <Link to="/login" className="font-medium text-orange-500 hover:text-orange-600">
-            Fazer login
+            {t('auth.register.login')}
           </Link>
         </p>
       </div>

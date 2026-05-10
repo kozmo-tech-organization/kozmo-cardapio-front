@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import { useCurrentRestaurant, useUpdateRestaurant } from '@repo/queries'
 import { Button, FormField, Card, CardContent, CardHeader, CardTitle, CardDescription } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 
 export function RestaurantSettingsPage() {
   const { data: restaurant } = useCurrentRestaurant()
   const updateRestaurant = useUpdateRestaurant()
+  const { t } = useTranslation()
 
   const [form, setForm] = useState({
     name: '',
@@ -53,62 +55,62 @@ export function RestaurantSettingsPage() {
   }
 
   if (!restaurant?.theme) {
-    return <p className="text-muted-foreground text-sm">Carregando configurações...</p>
+    return <p className="text-muted-foreground text-sm">{t('admin.settings.loading')}</p>
   }
 
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Configurações do restaurante</h1>
-        <p className="text-muted-foreground mt-1">Personalize o seu cardápio virtual</p>
+        <h1 className="text-3xl font-bold">{t('admin.settings.title')}</h1>
+        <p className="text-muted-foreground mt-1">{t('admin.settings.subtitle')}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <Card>
           <CardHeader>
-            <CardTitle>Informações básicas</CardTitle>
+            <CardTitle>{t('admin.settings.basicInfo')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
-              label="Nome do restaurante"
+              label={t('admin.settings.restaurantName')}
               value={form.name}
               onChange={(e) => setField('name', e.target.value)}
               required
               minLength={2}
             />
             <FormField
-              label="URL do logo"
+              label={t('admin.settings.logoUrl')}
               type="url"
               value={form.logoUrl}
               onChange={(e) => setField('logoUrl', e.target.value)}
               placeholder="https://..."
             />
             <FormField
-              label="URL do banner"
+              label={t('admin.settings.bannerUrl')}
               type="url"
               value={form.bannerUrl}
               onChange={(e) => setField('bannerUrl', e.target.value)}
               placeholder="https://..."
             />
             <FormField
-              label="Telefone do WhatsApp"
+              label={t('admin.settings.whatsappPhone')}
               type="tel"
               value={form.whatsappPhone}
               onChange={(e) => setField('whatsappPhone', e.target.value)}
-              placeholder="5511999999999 (com código do país e DDD)"
+              placeholder={t('admin.settings.whatsappPhonePlaceholder')}
             />
           </CardContent>
         </Card>
 
         <Card>
           <CardHeader>
-            <CardTitle>Tema e cores</CardTitle>
-            <CardDescription>Personalize as cores do seu cardápio</CardDescription>
+            <CardTitle>{t('admin.settings.themeColors')}</CardTitle>
+            <CardDescription>{t('admin.settings.customizeColors')}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Cor primária</label>
+                <label className="text-sm font-medium">{t('admin.settings.primaryColor')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -120,7 +122,7 @@ export function RestaurantSettingsPage() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Cor secundária</label>
+                <label className="text-sm font-medium">{t('admin.settings.secondaryColor')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -132,7 +134,7 @@ export function RestaurantSettingsPage() {
                 </div>
               </div>
               <div className="space-y-1.5">
-                <label className="text-sm font-medium">Cor de destaque</label>
+                <label className="text-sm font-medium">{t('admin.settings.accentColor')}</label>
                 <div className="flex items-center gap-2">
                   <input
                     type="color"
@@ -149,9 +151,9 @@ export function RestaurantSettingsPage() {
 
         <div className="flex items-center gap-3">
           <Button type="submit" loading={updateRestaurant.isPending}>
-            Salvar alterações
+            {t('admin.settings.save')}
           </Button>
-          {saved && <p className="text-sm text-green-600">Salvo com sucesso!</p>}
+          {saved && <p className="text-sm text-green-600">{t('admin.settings.savedSuccess')}</p>}
         </div>
       </form>
     </div>

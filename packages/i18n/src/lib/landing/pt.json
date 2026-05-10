@@ -1,0 +1,15 @@
+{
+  "landing.login": "Entrar",
+  "landing.hero.title1": "Seu cardápio digital",
+  "landing.hero.title2": "profissional",
+  "landing.hero.subtitle": "Crie um cardápio online bonito e funcional em minutos. Compartilhe por link ou QR Code.",
+  "landing.cta.start": "Começar Grátis",
+  "landing.cta.hasAccount": "Já tenho conta",
+  "landing.features.mobile.title": "Mobile-First",
+  "landing.features.mobile.desc": "Interface moderna que funciona perfeitamente em qualquer dispositivo.",
+  "landing.features.reviews.title": "Avaliações",
+  "landing.features.reviews.desc": "Receba feedback dos clientes diretamente pelo cardápio.",
+  "landing.features.management.title": "Gestão Fácil",
+  "landing.features.management.desc": "Painel administrativo intuitivo para gerenciar produtos e categorias.",
+  "landing.footer": "© {year} MenuPro · Todos os direitos reservados"
+}

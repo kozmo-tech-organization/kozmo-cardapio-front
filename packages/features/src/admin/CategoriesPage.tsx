@@ -7,7 +7,8 @@ import {
   useSetCategoryProducts,
   useProducts,
 } from '@repo/queries'
-import { Button, Card, CardContent, FormField, Label } from '@repo/ui'
+import { Button, Card, CardContent, FormField } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 import type { Category, CreateCategoryInput } from '@repo/schemas'
 
 const emptyForm: CreateCategoryInput = {
@@ -26,6 +27,7 @@ export function CategoriesPage() {
   const updateCategory = useUpdateCategory()
   const deleteCategory = useDeleteCategory()
   const setProducts = useSetCategoryProducts()
+  const { t } = useTranslation()
 
   const [view, setView] = useState<View>('list')
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
@@ -77,7 +79,7 @@ export function CategoriesPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Tem certeza que deseja excluir esta categoria?')) return
+    if (!confirm(t('admin.categories.confirmDelete'))) return
     await deleteCategory.mutateAsync(id)
   }
 
@@ -113,10 +115,10 @@ export function CategoriesPage() {
             onClick={cancelForm}
             className="text-muted-foreground hover:text-foreground text-sm"
           >
-            ← Voltar
+            {t('admin.categories.back')}
           </button>
           <h1 className="text-3xl font-bold">
-            {editingCategory ? 'Editar categoria' : 'Nova categoria'}
+            {editingCategory ? t('admin.categories.editTitle') : t('admin.categories.newTitle')}
           </h1>
         </div>
 
@@ -124,21 +126,21 @@ export function CategoriesPage() {
           <CardContent className="p-6">
             <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
-                label="Título"
+                label={t('admin.categories.form.title')}
                 value={form.title}
                 onChange={(e) => setField('title', e.target.value)}
                 required
                 className="sm:col-span-2"
               />
               <FormField
-                label="Subtítulo"
+                label={t('admin.categories.form.subtitle')}
                 value={form.subtitle ?? ''}
                 onChange={(e) => setField('subtitle', e.target.value || null)}
-                placeholder="Ex: Feitos na brasa com o melhor carvão"
+                placeholder={t('admin.categories.form.subtitlePlaceholder')}
                 className="sm:col-span-2"
               />
               <FormField
-                label="URL da imagem"
+                label={t('admin.categories.form.imageUrl')}
                 type="url"
                 value={form.imageUrl ?? ''}
                 onChange={(e) => setField('imageUrl', e.target.value || null)}
@@ -146,7 +148,7 @@ export function CategoriesPage() {
                 className="sm:col-span-2"
               />
               <FormField
-                label="Ordem de exibição"
+                label={t('admin.categories.form.order')}
                 type="number"
                 min="0"
                 value={form.order}
@@ -154,10 +156,10 @@ export function CategoriesPage() {
               />
               <div className="flex gap-2 sm:col-span-2">
                 <Button type="submit" loading={isPending}>
-                  {editingCategory ? 'Salvar alterações' : 'Criar categoria'}
+                  {editingCategory ? t('admin.categories.form.save') : t('admin.categories.form.create')}
                 </Button>
                 <Button type="button" variant="outline" onClick={cancelForm}>
-                  Cancelar
+                  {t('admin.categories.form.cancel')}
                 </Button>
               </div>
             </form>
@@ -168,6 +170,7 @@ export function CategoriesPage() {
   }
 
   if (view === 'products' && managingCategory) {
+    const count = selectedProductIds.size
     return (
       <div className="space-y-6">
         <div className="flex items-center gap-3">
@@ -175,12 +178,12 @@ export function CategoriesPage() {
             onClick={() => setView('list')}
             className="text-muted-foreground hover:text-foreground text-sm"
           >
-            ← Voltar
+            {t('admin.categories.back')}
           </button>
           <div>
-            <h1 className="text-3xl font-bold">Produtos da categoria</h1>
+            <h1 className="text-3xl font-bold">{t('admin.categories.productsTitle')}</h1>
             <p className="text-muted-foreground mt-1">
-              Selecione quais produtos pertencem à categoria "{managingCategory.title}"
+              {t('admin.categories.productsSubtitle', { name: managingCategory.title })}
             </p>
           </div>
         </div>
@@ -189,7 +192,7 @@ export function CategoriesPage() {
           <Card>
             <CardContent className="p-12 text-center">
               <p className="text-muted-foreground">
-                Nenhum produto cadastrado. Crie produtos primeiro.
+                {t('admin.categories.noProducts')}
               </p>
             </CardContent>
           </Card>
@@ -242,10 +245,10 @@ export function CategoriesPage() {
 
             <div className="flex items-center gap-3 pt-2">
               <Button onClick={handleSaveProducts} loading={setProducts.isPending}>
-                Salvar ({selectedProductIds.size} produto{selectedProductIds.size !== 1 ? 's' : ''})
+                {t(count !== 1 ? 'admin.categories.saveProducts.other' : 'admin.categories.saveProducts.one', { count })}
               </Button>
               <Button variant="outline" onClick={() => setView('list')}>
-                Cancelar
+                {t('admin.categories.form.cancel')}
               </Button>
             </div>
           </div>
@@ -258,22 +261,22 @@ export function CategoriesPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Categorias</h1>
+          <h1 className="text-3xl font-bold">{t('admin.categories.title')}</h1>
           <p className="text-muted-foreground mt-1">
-            Organize seus produtos por categoria no cardápio
+            {t('admin.categories.subtitle')}
           </p>
         </div>
-        <Button onClick={openCreate}>+ Nova categoria</Button>
+        <Button onClick={openCreate}>{t('admin.categories.new')}</Button>
       </div>
 
       {isLoading ? (
-        <p className="text-muted-foreground">Carregando categorias...</p>
+        <p className="text-muted-foreground">{t('admin.categories.loading')}</p>
       ) : categories?.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">Nenhuma categoria criada ainda.</p>
+            <p className="text-muted-foreground">{t('admin.categories.empty')}</p>
             <Button className="mt-4" onClick={openCreate}>
-              Criar primeira categoria
+              {t('admin.categories.createFirst')}
             </Button>
           </CardContent>
         </Card>
@@ -301,7 +304,12 @@ export function CategoriesPage() {
                       <p className="text-sm text-muted-foreground truncate">{category.subtitle}</p>
                     )}
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {category.productIds.length} produto{category.productIds.length !== 1 ? 's' : ''}
+                      {t(
+                        category.productIds.length !== 1
+                          ? 'admin.categories.count.other'
+                          : 'admin.categories.count.one',
+                        { count: category.productIds.length },
+                      )}
                     </p>
                   </div>
                   <div className="flex gap-2 shrink-0">
@@ -310,10 +318,10 @@ export function CategoriesPage() {
                       variant="outline"
                       onClick={() => openManageProducts(category)}
                     >
-                      Produtos
+                      {t('admin.categories.btn.products')}
                     </Button>
                     <Button size="sm" variant="outline" onClick={() => openEdit(category)}>
-                      Editar
+                      {t('admin.categories.btn.edit')}
                     </Button>
                     <Button
                       size="sm"
@@ -321,7 +329,7 @@ export function CategoriesPage() {
                       onClick={() => handleDelete(category.id)}
                       loading={deleteCategory.isPending}
                     >
-                      Excluir
+                      {t('admin.categories.btn.delete')}
                     </Button>
                   </div>
                 </div>

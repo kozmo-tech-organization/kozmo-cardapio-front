@@ -1,0 +1,15 @@
+{
+  "landing.login": "Entrar",
+  "landing.hero.title1": "Tu menú digital",
+  "landing.hero.title2": "profesional",
+  "landing.hero.subtitle": "Crea un menú online bonito y funcional en minutos. Comparte por enlace o código QR.",
+  "landing.cta.start": "Comenzar Gratis",
+  "landing.cta.hasAccount": "Ya tengo cuenta",
+  "landing.features.mobile.title": "Mobile-First",
+  "landing.features.mobile.desc": "Interfaz moderna que funciona perfectamente en cualquier dispositivo.",
+  "landing.features.reviews.title": "Reseñas",
+  "landing.features.reviews.desc": "Recibe comentarios de los clientes directamente a través del menú.",
+  "landing.features.management.title": "Gestión Fácil",
+  "landing.features.management.desc": "Panel administrativo intuitivo para gestionar productos y categorías.",
+  "landing.footer": "© {year} MenuPro · Todos los derechos reservados"
+}

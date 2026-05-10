@@ -1,6 +1,7 @@
 import { Link } from 'react-router'
 import { useCurrentRestaurant, useMenu } from '@repo/queries'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 
 function StarRating({ rating, size = 'sm' }: { rating: number; size?: 'sm' | 'md' }) {
   const cls = size === 'md' ? 'text-base' : 'text-sm'
@@ -30,6 +31,7 @@ function RatingBar({ label, count, max }: { label: string; count: number; max: n
 export function DashboardPage() {
   const { data: restaurant } = useCurrentRestaurant()
   const { data: menu } = useMenu(restaurant?.slug ?? '')
+  const { t, lang } = useTranslation()
 
   const products = menu?.products ?? []
 
@@ -59,18 +61,20 @@ export function DashboardPage() {
       productName: products.find((p) => p.id === r.productId)?.name ?? '—',
     }))
 
+  const dateLocale = lang === 'en' ? 'en-US' : lang === 'es' ? 'es-ES' : 'pt-BR'
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Bem-vindo, {restaurant?.name}</h1>
-        <p className="text-muted-foreground mt-1">Gerencie seu cardápio digital em um só lugar</p>
+        <h1 className="text-3xl font-bold">{t('admin.dashboard.welcome', { name: restaurant?.name ?? '' })}</h1>
+        <p className="text-muted-foreground mt-1">{t('admin.dashboard.subtitle')}</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Produtos</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t('admin.dashboard.stats.products')}</p>
               <p className="text-3xl font-bold">{products.length}</p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400">
@@ -86,7 +90,7 @@ export function DashboardPage() {
         <Card>
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Em estoque</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t('admin.dashboard.stats.inStock')}</p>
               <p className="text-3xl font-bold text-green-600">{inStockCount}</p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400">
@@ -101,7 +105,7 @@ export function DashboardPage() {
         <Card>
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Avaliações</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t('admin.dashboard.stats.reviews')}</p>
               <p className="text-3xl font-bold">{totalReviews}</p>
             </div>
             <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-100 text-orange-500 dark:bg-orange-900/30 dark:text-orange-400">
@@ -115,7 +119,7 @@ export function DashboardPage() {
         <Card>
           <CardContent className="p-5 flex items-center justify-between">
             <div>
-              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">Nota média</p>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">{t('admin.dashboard.stats.avgRating')}</p>
               <div className="flex items-baseline gap-1">
                 <p className="text-3xl font-bold">{globalAvg > 0 ? globalAvg.toFixed(1) : '—'}</p>
                 {globalAvg > 0 && <span className="text-yellow-400 text-lg">★</span>}
@@ -133,11 +137,11 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Distribuição de avaliações</CardTitle>
+            <CardTitle className="text-base">{t('admin.dashboard.ratingDistribution')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-2.5">
             {totalReviews === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhuma avaliação recebida ainda.</p>
+              <p className="text-sm text-muted-foreground">{t('admin.dashboard.noReviews')}</p>
             ) : (
               ratingCounts.map(({ star, count }) => (
                 <RatingBar key={star} label={String(star)} count={count} max={totalReviews} />
@@ -145,7 +149,10 @@ export function DashboardPage() {
             )}
             {totalReviews > 0 && (
               <p className="pt-2 text-xs text-muted-foreground">
-                Média geral: <strong>{globalAvg.toFixed(1)} ★</strong> de {totalReviews} avaliação{totalReviews !== 1 ? 'ões' : ''}
+                {t('admin.dashboard.avgLabel')}: <strong>{globalAvg.toFixed(1)} ★</strong>{' '}
+                {lang === 'pt' ? `de ${totalReviews} ${t(totalReviews !== 1 ? 'admin.dashboard.review.other' : 'admin.dashboard.review.one')}` :
+                 lang === 'es' ? `de ${totalReviews} ${t(totalReviews !== 1 ? 'admin.dashboard.review.other' : 'admin.dashboard.review.one')}` :
+                 `of ${totalReviews} ${t(totalReviews !== 1 ? 'admin.dashboard.review.other' : 'admin.dashboard.review.one')}`}
               </p>
             )}
           </CardContent>
@@ -153,11 +160,11 @@ export function DashboardPage() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Produtos mais bem avaliados</CardTitle>
+            <CardTitle className="text-base">{t('admin.dashboard.topRated')}</CardTitle>
           </CardHeader>
           <CardContent>
             {topRated.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhuma avaliação recebida ainda.</p>
+              <p className="text-sm text-muted-foreground">{t('admin.dashboard.noReviews')}</p>
             ) : (
               <div className="space-y-3">
                 {topRated.map((p, i) => (
@@ -168,7 +175,7 @@ export function DashboardPage() {
                       <div className="flex items-center gap-1.5">
                         <StarRating rating={p.averageRating ?? 0} />
                         <span className="text-xs text-muted-foreground">
-                          {(p.averageRating ?? 0).toFixed(1)} · {p.reviews.length} avaliação{p.reviews.length !== 1 ? 'ões' : ''}
+                          {(p.averageRating ?? 0).toFixed(1)} · {p.reviews.length} {t(p.reviews.length !== 1 ? 'admin.dashboard.review.other' : 'admin.dashboard.review.one')}
                         </span>
                       </div>
                     </div>
@@ -192,7 +199,7 @@ export function DashboardPage() {
       {recentReviews.length > 0 && (
         <Card>
           <CardHeader>
-            <CardTitle className="text-base">Avaliações recentes</CardTitle>
+            <CardTitle className="text-base">{t('admin.dashboard.recentReviews')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="divide-y divide-border">
@@ -202,14 +209,14 @@ export function DashboardPage() {
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="text-sm font-medium">{review.clientName}</span>
-                        <span className="text-xs text-muted-foreground">em {review.productName}</span>
+                        <span className="text-xs text-muted-foreground">{t('admin.dashboard.reviewedOn')} {review.productName}</span>
                       </div>
                       <p className="mt-0.5 text-sm text-muted-foreground line-clamp-2">{review.comment}</p>
                     </div>
                     <div className="shrink-0 text-right">
                       <StarRating rating={review.rating} />
                       <p className="text-xs text-muted-foreground mt-0.5">
-                        {new Date(review.createdAt).toLocaleDateString('pt-BR')}
+                        {new Date(review.createdAt).toLocaleDateString(dateLocale)}
                       </p>
                     </div>
                   </div>
@@ -223,9 +230,9 @@ export function DashboardPage() {
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardContent className="p-5">
-            <h2 className="font-semibold mb-1">Link do cardápio</h2>
+            <h2 className="font-semibold mb-1">{t('admin.dashboard.menuLink')}</h2>
             <p className="text-sm text-muted-foreground mb-3">
-              Compartilhe com seus clientes ou gere um QR Code
+              {t('admin.dashboard.menuLinkSubtitle')}
             </p>
             <code className="block rounded-lg bg-muted px-3 py-2 text-sm break-all">
               {window.location.origin}/menu/{restaurant?.slug}
@@ -234,13 +241,13 @@ export function DashboardPage() {
         </Card>
         <Card>
           <CardContent className="p-5 space-y-3">
-            <h2 className="font-semibold">Ações rápidas</h2>
+            <h2 className="font-semibold">{t('admin.dashboard.quickActions')}</h2>
             <div className="flex flex-col gap-2">
               <Link to="/admin/products" className="text-sm text-primary hover:underline">
-                + Adicionar produto
+                {t('admin.dashboard.addProduct')}
               </Link>
               <Link to="/admin/settings" className="text-sm text-primary hover:underline">
-                Configurar tema do restaurante
+                {t('admin.dashboard.configureTheme')}
               </Link>
               <a
                 href={`/menu/${restaurant?.slug}`}
@@ -248,7 +255,7 @@ export function DashboardPage() {
                 rel="noopener noreferrer"
                 className="text-sm text-primary hover:underline"
               >
-                Ver cardápio como cliente →
+                {t('admin.dashboard.viewAsClient')}
               </a>
             </div>
           </CardContent>

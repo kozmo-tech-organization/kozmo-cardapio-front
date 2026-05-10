@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Card, CardContent, Badge, Button, FormField, Label } from '@repo/ui'
 import { useCreateReview } from '@repo/queries'
+import { useTranslation } from '@repo/i18n'
 import type { MenuProduct } from '@repo/schemas'
 
 interface ProductCardProps {
@@ -9,6 +10,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const createReview = useCreateReview()
+  const { t } = useTranslation()
   const [showReview, setShowReview] = useState(false)
   const [reviewForm, setReviewForm] = useState({ clientName: '', comment: '', rating: 5 })
   const [reviewSent, setReviewSent] = useState(false)
@@ -54,7 +56,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {product.reviews.length > 0 && (
           <div className="space-y-2 border-t pt-3">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Avaliações</p>
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">{t('menu.product.reviews')}</p>
             {product.reviews.slice(0, 3).map((review) => (
               <div key={review.id} className="text-sm">
                 <div className="flex items-center justify-between">
@@ -69,26 +71,26 @@ export function ProductCard({ product }: ProductCardProps) {
 
         {!showReview && !reviewSent && (
           <Button variant="outline" size="sm" className="w-full" onClick={() => setShowReview(true)}>
-            Avaliar produto
+            {t('menu.product.rate')}
           </Button>
         )}
 
         {reviewSent && (
-          <p className="text-center text-sm text-green-600">Avaliação enviada! Obrigado.</p>
+          <p className="text-center text-sm text-green-600">{t('menu.product.reviewSent')}</p>
         )}
 
         {showReview && (
           <form onSubmit={handleReviewSubmit} className="space-y-3 border-t pt-3">
-            <p className="text-sm font-medium">Deixe sua avaliação</p>
+            <p className="text-sm font-medium">{t('menu.product.leaveReview')}</p>
             <FormField
-              label="Seu nome"
+              label={t('menu.product.yourName')}
               value={reviewForm.clientName}
               onChange={(e) => setReviewField('clientName', e.target.value)}
               required
               minLength={2}
             />
             <div className="space-y-1.5">
-              <Label>Comentário</Label>
+              <Label>{t('menu.product.comment')}</Label>
               <textarea
                 value={reviewForm.comment}
                 onChange={(e) => setReviewField('comment', e.target.value)}
@@ -96,11 +98,11 @@ export function ProductCard({ product }: ProductCardProps) {
                 minLength={5}
                 rows={2}
                 className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                placeholder="Como foi sua experiência?"
+                placeholder={t('menu.product.commentPlaceholder')}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Nota</Label>
+              <Label>{t('menu.product.rating')}</Label>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -118,10 +120,10 @@ export function ProductCard({ product }: ProductCardProps) {
             </div>
             <div className="flex gap-2">
               <Button type="submit" size="sm" loading={createReview.isPending}>
-                Enviar
+                {t('menu.product.submit')}
               </Button>
               <Button type="button" size="sm" variant="outline" onClick={() => setShowReview(false)}>
-                Cancelar
+                {t('menu.product.cancel')}
               </Button>
             </div>
           </form>

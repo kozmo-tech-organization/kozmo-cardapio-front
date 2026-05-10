@@ -2,10 +2,12 @@ import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
 import { useLogin } from '@repo/queries'
 import { Button, FormField } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 
 export function LoginPage() {
   const navigate = useNavigate()
   const login = useLogin()
+  const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
@@ -17,7 +19,7 @@ export function LoginPage() {
       await login.mutateAsync({ email, password })
       navigate('/admin')
     } catch (err: any) {
-      setError(err?.message ?? 'Credenciais inválidas')
+      setError(err?.message ?? t('auth.login.defaultError'))
     }
   }
 
@@ -33,38 +35,38 @@ export function LoginPage() {
             </svg>
           </div>
           <h1 className="text-xl font-bold text-gray-900">Kozmo Cardápio Digital</h1>
-          <p className="text-sm text-gray-500">Entre na sua conta</p>
+          <p className="text-sm text-gray-500">{t('auth.login.subtitle')}</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField
-            label="Email"
+            label={t('auth.login.email')}
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="seu@restaurante.com"
+            placeholder={t('auth.login.emailPlaceholder')}
             required
             autoComplete="email"
           />
           <FormField
-            label="Senha"
+            label={t('auth.login.password')}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="••••••••"
+            placeholder={t('auth.login.passwordPlaceholder')}
             required
             autoComplete="current-password"
           />
           {error && <p className="text-sm text-destructive">{error}</p>}
           <Button type="submit" className="w-full" loading={login.isPending}>
-            Entrar
+            {t('auth.login.submit')}
           </Button>
         </form>
 
         <p className="mt-5 text-center text-sm text-gray-500">
-          Não tem conta?{' '}
+          {t('auth.login.noAccount')}{' '}
           <Link to="/register" className="font-medium text-orange-500 hover:text-orange-600">
-            Cadastre-se
+            {t('auth.login.register')}
           </Link>
         </p>
       </div>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@repo/queries'
 import { Button, Card, CardContent, Badge, FormField, Label } from '@repo/ui'
+import { useTranslation } from '@repo/i18n'
 import type { Product, CreateProductInput } from '@repo/schemas'
 
 const emptyForm: CreateProductInput = {
@@ -17,6 +18,7 @@ export function ProductsPage() {
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
+  const { t } = useTranslation()
 
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
@@ -57,7 +59,7 @@ export function ProductsPage() {
   }
 
   async function handleDelete(id: string) {
-    if (!confirm('Tem certeza que deseja excluir este produto?')) return
+    if (!confirm(t('admin.products.confirmDelete'))) return
     await deleteProduct.mutateAsync(id)
   }
 
@@ -67,28 +69,28 @@ export function ProductsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Produtos</h1>
-          <p className="text-muted-foreground mt-1">Gerencie os produtos do seu cardápio</p>
+          <h1 className="text-3xl font-bold">{t('admin.products.title')}</h1>
+          <p className="text-muted-foreground mt-1">{t('admin.products.subtitle')}</p>
         </div>
-        <Button onClick={openCreate}>+ Novo produto</Button>
+        <Button onClick={openCreate}>{t('admin.products.new')}</Button>
       </div>
 
       {showForm && (
         <Card>
           <CardContent className="p-6">
             <h2 className="text-lg font-semibold mb-4">
-              {editingProduct ? 'Editar produto' : 'Novo produto'}
+              {editingProduct ? t('admin.products.editTitle') : t('admin.products.newTitle')}
             </h2>
             <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormField
-                label="Nome"
+                label={t('admin.products.form.name')}
                 value={form.name}
                 onChange={(e) => setField('name', e.target.value)}
                 required
                 className="sm:col-span-2"
               />
               <FormField
-                label="Preço (R$)"
+                label={t('admin.products.form.price')}
                 type="number"
                 step="0.01"
                 min="0"
@@ -97,7 +99,7 @@ export function ProductsPage() {
                 required
               />
               <FormField
-                label="Tempo de preparo (min)"
+                label={t('admin.products.form.prepTime')}
                 type="number"
                 min="1"
                 value={form.preparationTimeMinutes}
@@ -105,7 +107,7 @@ export function ProductsPage() {
                 required
               />
               <div className="sm:col-span-2 space-y-1.5">
-                <Label>Descrição / Ingredientes</Label>
+                <Label>{t('admin.products.form.description')}</Label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setField('description', e.target.value)}
@@ -113,11 +115,11 @@ export function ProductsPage() {
                   minLength={5}
                   rows={3}
                   className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-                  placeholder="Ingredientes e descrição do produto..."
+                  placeholder={t('admin.products.form.descriptionPlaceholder')}
                 />
               </div>
               <FormField
-                label="URL da imagem"
+                label={t('admin.products.form.imageUrl')}
                 type="url"
                 value={form.imageUrl ?? ''}
                 onChange={(e) => setField('imageUrl', e.target.value || null)}
@@ -132,14 +134,14 @@ export function ProductsPage() {
                   onChange={(e) => setField('inStock', e.target.checked)}
                   className="h-4 w-4 rounded border-input"
                 />
-                <Label htmlFor="inStock">Em estoque</Label>
+                <Label htmlFor="inStock">{t('admin.products.form.inStock')}</Label>
               </div>
               <div className="flex gap-2 sm:col-span-2">
                 <Button type="submit" loading={isPending}>
-                  {editingProduct ? 'Salvar alterações' : 'Criar produto'}
+                  {editingProduct ? t('admin.products.form.save') : t('admin.products.form.create')}
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setShowForm(false)}>
-                  Cancelar
+                  {t('admin.products.form.cancel')}
                 </Button>
               </div>
             </form>
@@ -148,12 +150,12 @@ export function ProductsPage() {
       )}
 
       {isLoading ? (
-        <p className="text-muted-foreground">Carregando produtos...</p>
+        <p className="text-muted-foreground">{t('admin.products.loading')}</p>
       ) : products?.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
-            <p className="text-muted-foreground">Nenhum produto cadastrado ainda.</p>
-            <Button className="mt-4" onClick={openCreate}>Adicionar primeiro produto</Button>
+            <p className="text-muted-foreground">{t('admin.products.empty')}</p>
+            <Button className="mt-4" onClick={openCreate}>{t('admin.products.addFirst')}</Button>
           </CardContent>
         </Card>
       ) : (
@@ -171,7 +173,7 @@ export function ProductsPage() {
                 <div className="flex items-start justify-between gap-2">
                   <h3 className="font-semibold">{product.name}</h3>
                   <Badge variant={product.inStock ? 'success' : 'destructive'}>
-                    {product.inStock ? 'Em estoque' : 'Sem estoque'}
+                    {product.inStock ? t('admin.products.inStock') : t('admin.products.outOfStock')}
                   </Badge>
                 </div>
                 <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
@@ -185,7 +187,7 @@ export function ProductsPage() {
                 </div>
                 <div className="flex gap-2 pt-2">
                   <Button size="sm" variant="outline" onClick={() => openEdit(product)} className="flex-1">
-                    Editar
+                    {t('admin.products.edit')}
                   </Button>
                   <Button
                     size="sm"
@@ -194,7 +196,7 @@ export function ProductsPage() {
                     loading={deleteProduct.isPending}
                     className="flex-1"
                   >
-                    Excluir
+                    {t('admin.products.delete')}
                   </Button>
                 </div>
               </CardContent>

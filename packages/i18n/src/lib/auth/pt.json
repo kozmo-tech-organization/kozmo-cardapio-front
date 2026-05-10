@@ -1,0 +1,22 @@
+{
+  "auth.login.subtitle": "Entre na sua conta",
+  "auth.login.email": "Email",
+  "auth.login.password": "Senha",
+  "auth.login.emailPlaceholder": "seu@restaurante.com",
+  "auth.login.passwordPlaceholder": "••••••••",
+  "auth.login.submit": "Entrar",
+  "auth.login.noAccount": "Não tem conta?",
+  "auth.login.register": "Cadastre-se",
+  "auth.login.defaultError": "Credenciais inválidas",
+  "auth.register.subtitle": "Crie sua conta gratuitamente",
+  "auth.register.restaurantName": "Nome do restaurante",
+  "auth.register.restaurantNamePlaceholder": "Pizzaria do João",
+  "auth.register.email": "Email",
+  "auth.register.emailPlaceholder": "seu@restaurante.com",
+  "auth.register.password": "Senha",
+  "auth.register.passwordPlaceholder": "Mínimo 6 caracteres",
+  "auth.register.submit": "Criar conta",
+  "auth.register.hasAccount": "Já tem conta?",
+  "auth.register.login": "Fazer login",
+  "auth.register.defaultError": "Erro ao criar conta"
+}
