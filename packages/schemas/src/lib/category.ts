@@ -7,6 +7,7 @@ export const CategorySchema = z.object({
   subtitle: z.string().nullable(),
   imageUrl: z.string().url().nullable(),
   order: z.number().int(),
+  status: z.boolean(),
   productIds: z.array(z.string().uuid()),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
@@ -17,6 +18,7 @@ export const CreateCategorySchema = z.object({
   subtitle: z.string().nullable().optional(),
   imageUrl: z.string().url().nullable().optional(),
   order: z.number().int().min(0).default(0),
+  status: z.boolean().default(false),
 })
 
 export const UpdateCategorySchema = CreateCategorySchema.partial()
