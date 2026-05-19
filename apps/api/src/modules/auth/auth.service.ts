@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm'
 import { Repository } from 'typeorm'
 import * as bcrypt from 'bcryptjs'
 import { Restaurant } from '../restaurants/entities/restaurant.entity'
+import { Product } from '../products/entities/product.entity'
 import type { LoginInput, RegisterInput } from '@repo/schemas'
 
 @Injectable()
@@ -11,6 +12,8 @@ export class AuthService {
   constructor(
     @InjectRepository(Restaurant)
     private restaurantsRepository: Repository<Restaurant>,
+    @InjectRepository(Product)
+    private productsRepository: Repository<Product>,
     @Inject(JwtService)
     private jwtService: JwtService,
   ) {}
@@ -28,6 +31,8 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Invalid credentials')
     }
+
+    await this.handlePlanExpirationOnLogin(restaurant)
 
     return this.generateAuthResponse(restaurant)
   }
@@ -95,5 +100,29 @@ export class AuthService {
     const existing = await this.restaurantsRepository.findOne({ where: { slug } })
     if (!existing) return slug
     return `${slug}-${Date.now()}`
+  }
+
+  private async handlePlanExpirationOnLogin(restaurant: Restaurant) {
+    if (restaurant.planType === 'FREE') return
+    if (!restaurant.paymentDay) return
+
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+
+    const paymentDay = new Date(restaurant.paymentDay)
+    paymentDay.setHours(0, 0, 0, 0)
+
+    if (today <= paymentDay) return
+
+    restaurant.limitProducts = 1
+    restaurant.limitCategories = 1
+    restaurant.planType = 'FREE'
+    restaurant.paymentDay = null
+
+    await this.restaurantsRepository.save(restaurant)
+    await this.productsRepository.update(
+      { restaurantId: restaurant.id },
+      { inStock: false },
+    )
   }
 }

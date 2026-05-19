@@ -6,10 +6,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { AuthService } from './auth.service'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { Restaurant } from '../restaurants/entities/restaurant.entity'
+import { Product } from '../products/entities/product.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Restaurant]),
+    TypeOrmModule.forFeature([Restaurant, Product]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
