@@ -36,6 +36,9 @@ export class Category {
   @Column({ type: 'int', default: 0 })
   order: number
 
+  @Column({type: 'boolean', default: false})
+  status: boolean
+
   @ManyToMany(() => Product, (product) => product.categories)
   @JoinTable({ name: 'category_products' })
   products: Product[]
@@ -45,4 +48,5 @@ export class Category {
 
   @UpdateDateColumn()
   updatedAt: Date
+  
 }

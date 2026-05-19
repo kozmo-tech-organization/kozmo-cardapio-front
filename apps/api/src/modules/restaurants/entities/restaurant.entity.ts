@@ -8,6 +8,7 @@ import {
 } from 'typeorm'
 import { Product } from '../../products/entities/product.entity'
 
+
 @Entity('restaurants')
 export class Restaurant {
   @PrimaryGeneratedColumn('uuid')
@@ -50,4 +51,20 @@ export class Restaurant {
 
   @UpdateDateColumn()
   updatedAt: Date
+
+  @Column({type: 'boolean', default: false, comment: 'indica o status do estabelecimento, se desativado nao deve aparecer no app cliente'})
+  status: boolean
+
+  @Column({type: 'numeric', default: 1})
+  limitProducts: number
+
+  @Column({type: 'numeric', default: 1})
+  limitCategories: number
+
+  @Column({type: 'enum', enum: ['FREE', 'BASIC', 'PREMIUM'], default: 'FREE' })
+  planType: 'FREE' | 'BASIC' | 'PREMIUM'
+  
+  @Column({type: 'date', nullable: true, default: null})
+  paymentDay: Date | null
+  
 }
