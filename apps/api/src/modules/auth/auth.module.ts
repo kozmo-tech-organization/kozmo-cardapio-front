@@ -7,10 +7,11 @@ import { AuthService } from './auth.service'
 import { JwtStrategy } from './strategies/jwt.strategy'
 import { Restaurant } from '../restaurants/entities/restaurant.entity'
 import { Product } from '../products/entities/product.entity'
+import { Category } from '../categories/entities/category.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Restaurant, Product]),
+    TypeOrmModule.forFeature([Restaurant, Product, Category]),
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

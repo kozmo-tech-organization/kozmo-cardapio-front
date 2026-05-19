@@ -5,6 +5,7 @@ import { Repository } from 'typeorm'
 import * as bcrypt from 'bcryptjs'
 import { Restaurant } from '../restaurants/entities/restaurant.entity'
 import { Product } from '../products/entities/product.entity'
+import { Category } from '../categories/entities/category.entity'
 import type { LoginInput, RegisterInput } from '@repo/schemas'
 
 @Injectable()
@@ -14,6 +15,8 @@ export class AuthService {
     private restaurantsRepository: Repository<Restaurant>,
     @InjectRepository(Product)
     private productsRepository: Repository<Product>,
+    @InjectRepository(Category)
+    private categoriesRepository: Repository<Category>,
     @Inject(JwtService)
     private jwtService: JwtService,
   ) {}
@@ -123,6 +126,10 @@ export class AuthService {
     await this.productsRepository.update(
       { restaurantId: restaurant.id },
       { inStock: false },
+    )
+    await this.categoriesRepository.update(
+      { restaurantId: restaurant.id },
+      { status: false },
     )
   }
 }
