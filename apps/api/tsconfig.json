@@ -19,6 +19,7 @@
     "forceConsistentCasingInFileNames": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
+    "strictPropertyInitialization": false,
     "paths": {
       "@repo/schemas": ["../../packages/schemas/src/index.ts"]
     }
