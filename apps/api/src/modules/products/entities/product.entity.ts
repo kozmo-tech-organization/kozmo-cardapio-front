@@ -8,12 +8,14 @@ import {
   ManyToMany,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm'
 import { Restaurant } from '../../restaurants/entities/restaurant.entity'
 import { Review } from '../../reviews/entities/review.entity'
 import { Category } from '../../categories/entities/category.entity'
 
 @Entity('products')
+@Index('IDX_PROD_REST_UUID', ['restaurantId'])
 export class Product {
   @PrimaryGeneratedColumn('uuid')
   id: string
