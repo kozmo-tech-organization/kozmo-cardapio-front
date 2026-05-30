@@ -8,6 +8,7 @@
   "menu.clearSearch": "Limpiar búsqueda",
   "menu.results.one": "{count} resultado para \"{query}\"",
   "menu.results.other": "{count} resultados para \"{query}\"",
+  "menu.allCategories": "Todos",
   "menu.others": "Otros",
   "menu.empty": "No hay artículos disponibles en este momento.",
   "menu.categoryEmpty": "No hay artículos en esta categoría.",

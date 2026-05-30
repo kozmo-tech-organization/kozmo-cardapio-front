@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct } from '@repo/queries'
-import { Button, Card, CardContent, Badge, FormField, Label, Input } from '@repo/ui'
+import { useProducts, useCreateProduct, useUpdateProduct, useDeleteProduct, useCurrentRestaurant } from '@repo/queries'
+import { Button, Card, CardContent, Badge, FormField, Label, Input, useToast } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'
 import type { Product, CreateProductInput } from '@repo/schemas'
 
@@ -15,15 +15,29 @@ const emptyForm: CreateProductInput = {
 
 export function ProductsPage() {
   const { data: products, isLoading } = useProducts()
+  const { data: restaurant } = useCurrentRestaurant()
   const createProduct = useCreateProduct()
   const updateProduct = useUpdateProduct()
   const deleteProduct = useDeleteProduct()
   const { t } = useTranslation()
+  const { toast } = useToast()
 
   const [showForm, setShowForm] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const [form, setForm] = useState<CreateProductInput>(emptyForm)
   const [search, setSearch] = useState('')
+
+  function handleError(err: unknown) {
+    const code = (err as any)?.code
+    const msg: string = err instanceof Error ? err.message : ''
+    if (code === 'FORBIDDEN' && msg.includes('Active product limit')) {
+      toast({ variant: 'error', title: t('admin.errors.productActivationLimitReached'), description: t('admin.errors.productActivationLimitReachedDesc') })
+    } else if (code === 'FORBIDDEN' && msg.includes('Product limit')) {
+      toast({ variant: 'error', title: t('admin.errors.productLimitReached'), description: t('admin.errors.productLimitReachedDesc') })
+    } else {
+      toast({ variant: 'error', title: t('admin.errors.generic'), description: t('admin.errors.genericDesc') })
+    }
+  }
 
   function setField(field: string, value: any) {
     setForm((prev) => ({ ...prev, [field]: value }))
@@ -50,18 +64,29 @@ export function ProductsPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (editingProduct) {
-      await updateProduct.mutateAsync({ id: editingProduct.id, ...form })
-    } else {
-      await createProduct.mutateAsync(form)
+    try {
+      if (editingProduct) {
+        await updateProduct.mutateAsync({ id: editingProduct.id, ...form })
+        toast({ variant: 'success', title: t('admin.products.updatedSuccess') })
+      } else {
+        await createProduct.mutateAsync(form)
+        toast({ variant: 'success', title: t('admin.products.createdSuccess') })
+      }
+      setShowForm(false)
+      setEditingProduct(null)
+    } catch (err) {
+      handleError(err)
     }
-    setShowForm(false)
-    setEditingProduct(null)
   }
 
   async function handleDelete(id: string) {
     if (!confirm(t('admin.products.confirmDelete'))) return
-    await deleteProduct.mutateAsync(id)
+    try {
+      await deleteProduct.mutateAsync(id)
+      toast({ variant: 'success', title: t('admin.products.deletedSuccess') })
+    } catch (err) {
+      handleError(err)
+    }
   }
 
   const isPending = createProduct.isPending || updateProduct.isPending
@@ -70,14 +95,34 @@ export function ProductsPage() {
     ? products?.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()))
     : products
 
+  const usedProducts = products?.length ?? 0
+  const limitProducts = restaurant?.limitProducts ?? null
+  const atLimit = limitProducts !== null && usedProducts >= limitProducts
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold">{t('admin.products.title')}</h1>
           <p className="text-muted-foreground mt-1">{t('admin.products.subtitle')}</p>
         </div>
-        <Button onClick={openCreate}>{t('admin.products.new')}</Button>
+        <div className="flex items-center gap-3">
+          {limitProducts !== null && (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
+                atLimit
+                  ? 'bg-red-100 text-red-700'
+                  : usedProducts >= limitProducts * 0.8
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-green-100 text-green-700'
+              }`}
+            >
+              <span>{usedProducts}/{limitProducts}</span>
+              <span className="text-xs font-normal opacity-75">{t('admin.products.planUsage')}</span>
+            </span>
+          )}
+          <Button onClick={openCreate} disabled={atLimit}>{t('admin.products.new')}</Button>
+        </div>
       </div>
 
       {!showForm && (

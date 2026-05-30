@@ -3,12 +3,14 @@ import type { RestaurantsService } from '../modules/restaurants/restaurants.serv
 import type { ProductsService } from '../modules/products/products.service'
 import type { ReviewsService } from '../modules/reviews/reviews.service'
 import type { CategoriesService } from '../modules/categories/categories.service'
+import type { PromotionsService } from '../modules/promotions/promotions.service'
 import { createAuthRouter } from './routers/auth.router'
 import { createRestaurantRouter } from './routers/restaurant.router'
 import { createProductsRouter } from './routers/products.router'
 import { createMenuRouter } from './routers/menu.router'
 import { createReviewsRouter } from './routers/reviews.router'
 import { createCategoriesRouter } from './routers/categories.router'
+import { createPromotionsRouter } from './routers/promotions.router'
 
 export interface RouterServices {
   authService: AuthService
@@ -16,6 +18,7 @@ export interface RouterServices {
   productsService: ProductsService
   reviewsService: ReviewsService
   categoriesService: CategoriesService
+  promotionsService: PromotionsService
 }
 
 export function createAppRouter(services: RouterServices) {
@@ -24,7 +27,8 @@ export function createAppRouter(services: RouterServices) {
     restaurant: createRestaurantRouter(services.restaurantsService),
     products: createProductsRouter(services.productsService),
     categories: createCategoriesRouter(services.categoriesService),
-    menu: createMenuRouter(services.restaurantsService, services.productsService, services.reviewsService, services.categoriesService),
+    promotions: createPromotionsRouter(services.promotionsService),
+    menu: createMenuRouter(services.restaurantsService, services.productsService, services.reviewsService, services.categoriesService, services.promotionsService),
     reviews: createReviewsRouter(services.reviewsService),
   }
 }

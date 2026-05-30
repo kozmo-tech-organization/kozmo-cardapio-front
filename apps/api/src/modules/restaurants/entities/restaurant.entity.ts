@@ -55,10 +55,10 @@ export class Restaurant {
   @Column({type: 'boolean', default: false, comment: 'indica o status do estabelecimento, se desativado nao deve aparecer no app cliente'})
   status: boolean
 
-  @Column({type: 'numeric', default: 1})
+  @Column({type: 'numeric', default: 10})
   limitProducts: number
 
-  @Column({type: 'numeric', default: 1})
+  @Column({type: 'numeric', default: 10})
   limitCategories: number
 
   @Column({type: 'enum', enum: ['FREE', 'BASIC', 'PREMIUM'], default: 'FREE' })

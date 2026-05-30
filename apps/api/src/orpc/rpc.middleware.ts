@@ -6,6 +6,7 @@ import { RestaurantsService } from '../modules/restaurants/restaurants.service'
 import { ProductsService } from '../modules/products/products.service'
 import { ReviewsService } from '../modules/reviews/reviews.service'
 import { CategoriesService } from '../modules/categories/categories.service'
+import { PromotionsService } from '../modules/promotions/promotions.service'
 import { createAppRouter } from './router'
 import { createContextBuilder } from './context'
 
@@ -20,9 +21,10 @@ export class RpcMiddleware implements NestMiddleware {
     @Inject(ProductsService) productsService: ProductsService,
     @Inject(ReviewsService) reviewsService: ReviewsService,
     @Inject(CategoriesService) categoriesService: CategoriesService,
+    @Inject(PromotionsService) promotionsService: PromotionsService,
     @Inject(JwtService) jwtService: JwtService,
   ) {
-    const appRouter = createAppRouter({ authService, restaurantsService, productsService, reviewsService, categoriesService })
+    const appRouter = createAppRouter({ authService, restaurantsService, productsService, reviewsService, categoriesService, promotionsService })
     this.rpcHandler = new RPCHandler(appRouter)
     this.buildContext = createContextBuilder(jwtService)
   }

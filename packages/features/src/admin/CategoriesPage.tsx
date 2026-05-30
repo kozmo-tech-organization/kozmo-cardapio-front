@@ -6,8 +6,9 @@ import {
   useDeleteCategory,
   useSetCategoryProducts,
   useProducts,
+  useCurrentRestaurant,
 } from '@repo/queries'
-import { Button, Card, CardContent, FormField, Input } from '@repo/ui'
+import { Button, Card, CardContent, FormField, Input, Badge, useToast } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'
 import type { Category, CreateCategoryInput } from '@repo/schemas'
 
@@ -16,6 +17,7 @@ const emptyForm: CreateCategoryInput = {
   subtitle: null,
   imageUrl: null,
   order: 0,
+  status: false,
 }
 
 type View = 'list' | 'form' | 'products'
@@ -23,11 +25,14 @@ type View = 'list' | 'form' | 'products'
 export function CategoriesPage() {
   const { data: categories, isLoading } = useCategories()
   const { data: products } = useProducts()
+  const { data: restaurant } = useCurrentRestaurant()
   const createCategory = useCreateCategory()
   const updateCategory = useUpdateCategory()
   const deleteCategory = useDeleteCategory()
   const setProducts = useSetCategoryProducts()
   const { t } = useTranslation()
+
+  const { toast } = useToast()
 
   const [view, setView] = useState<View>('list')
   const [editingCategory, setEditingCategory] = useState<Category | null>(null)
@@ -53,6 +58,7 @@ export function CategoriesPage() {
       subtitle: category.subtitle,
       imageUrl: category.imageUrl,
       order: category.order,
+      status: category.status,
     })
     setEditingCategory(category)
     setView('form')
@@ -69,30 +75,58 @@ export function CategoriesPage() {
     setEditingCategory(null)
   }
 
+  function handleError(err: unknown) {
+    const code = (err as any)?.code
+    const msg: string = err instanceof Error ? err.message : ''
+    if (code === 'FORBIDDEN' && msg.includes('Active category limit')) {
+      toast({ variant: 'error', title: t('admin.errors.categoryActivationLimitReached'), description: t('admin.errors.categoryActivationLimitReachedDesc') })
+    } else if (code === 'FORBIDDEN' && msg.includes('Category limit')) {
+      toast({ variant: 'error', title: t('admin.errors.categoryLimitReached'), description: t('admin.errors.categoryLimitReachedDesc') })
+    } else {
+      toast({ variant: 'error', title: t('admin.errors.generic'), description: t('admin.errors.genericDesc') })
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (editingCategory) {
-      await updateCategory.mutateAsync({ id: editingCategory.id, ...form })
-    } else {
-      await createCategory.mutateAsync(form)
+    try {
+      if (editingCategory) {
+        await updateCategory.mutateAsync({ id: editingCategory.id, ...form })
+        toast({ variant: 'success', title: t('admin.categories.updatedSuccess') })
+      } else {
+        await createCategory.mutateAsync(form)
+        toast({ variant: 'success', title: t('admin.categories.createdSuccess') })
+      }
+      setView('list')
+      setEditingCategory(null)
+    } catch (err) {
+      handleError(err)
     }
-    setView('list')
-    setEditingCategory(null)
   }
 
   async function handleDelete(id: string) {
     if (!confirm(t('admin.categories.confirmDelete'))) return
-    await deleteCategory.mutateAsync(id)
+    try {
+      await deleteCategory.mutateAsync(id)
+      toast({ variant: 'success', title: t('admin.categories.deletedSuccess') })
+    } catch (err) {
+      handleError(err)
+    }
   }
 
   async function handleSaveProducts() {
     if (!managingCategory) return
-    await setProducts.mutateAsync({
-      categoryId: managingCategory.id,
-      productIds: Array.from(selectedProductIds),
-    })
-    setView('list')
-    setManagingCategory(null)
+    try {
+      await setProducts.mutateAsync({
+        categoryId: managingCategory.id,
+        productIds: Array.from(selectedProductIds),
+      })
+      toast({ variant: 'success', title: t('admin.categories.productsSavedSuccess') })
+      setView('list')
+      setManagingCategory(null)
+    } catch (err) {
+      handleError(err)
+    }
   }
 
   function toggleProduct(productId: string) {
@@ -156,6 +190,18 @@ export function CategoriesPage() {
                 value={form.order}
                 onChange={(e) => setField('order', parseInt(e.target.value) || 0)}
               />
+              <div className="flex items-center gap-2 sm:col-span-2">
+                <input
+                  type="checkbox"
+                  id="categoryStatus"
+                  checked={form.status ?? false}
+                  onChange={(e) => setField('status', e.target.checked)}
+                  className="h-4 w-4 rounded border-input"
+                />
+                <label htmlFor="categoryStatus" className="text-sm font-medium">
+                  {t('admin.categories.form.active')}
+                </label>
+              </div>
               <div className="flex gap-2 sm:col-span-2">
                 <Button type="submit" loading={isPending}>
                   {editingCategory ? t('admin.categories.form.save') : t('admin.categories.form.create')}
@@ -272,16 +318,36 @@ export function CategoriesPage() {
     ? categories?.filter((c) => c.title.toLowerCase().includes(categorySearch.toLowerCase()))
     : categories
 
+  const usedCategories = categories?.length ?? 0
+  const limitCategories = restaurant?.limitCategories ?? null
+  const atCategoryLimit = limitCategories !== null && usedCategories >= limitCategories
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
           <h1 className="text-3xl font-bold">{t('admin.categories.title')}</h1>
           <p className="text-muted-foreground mt-1">
             {t('admin.categories.subtitle')}
           </p>
         </div>
-        <Button onClick={openCreate}>{t('admin.categories.new')}</Button>
+        <div className="flex items-center gap-3">
+          {limitCategories !== null && (
+            <span
+              className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-medium ${
+                atCategoryLimit
+                  ? 'bg-red-100 text-red-700'
+                  : usedCategories >= limitCategories * 0.8
+                    ? 'bg-yellow-100 text-yellow-700'
+                    : 'bg-green-100 text-green-700'
+              }`}
+            >
+              <span>{usedCategories}/{limitCategories}</span>
+              <span className="text-xs font-normal opacity-75">{t('admin.categories.planUsage')}</span>
+            </span>
+          )}
+          <Button onClick={openCreate} disabled={atCategoryLimit}>{t('admin.categories.new')}</Button>
+        </div>
       </div>
 
       {isLoading ? (
@@ -327,6 +393,9 @@ export function CategoriesPage() {
                         #{category.order}
                       </span>
                       <h3 className="font-semibold">{category.title}</h3>
+                      <Badge variant={category.status ? 'success' : 'destructive'}>
+                        {category.status ? t('admin.categories.active') : t('admin.categories.inactive')}
+                      </Badge>
                     </div>
                     {category.subtitle && (
                       <p className="text-sm text-muted-foreground truncate">{category.subtitle}</p>

@@ -117,8 +117,8 @@ export class AuthService {
 
     if (today <= paymentDay) return
 
-    restaurant.limitProducts = 1
-    restaurant.limitCategories = 1
+    restaurant.limitProducts = 10
+    restaurant.limitCategories = 10
     restaurant.planType = 'FREE'
     restaurant.paymentDay = null
 

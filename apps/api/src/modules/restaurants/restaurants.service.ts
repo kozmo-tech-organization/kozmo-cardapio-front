@@ -47,6 +47,9 @@ export class RestaurantsService {
       logoUrl: restaurant.logoUrl,
       bannerUrl: restaurant.bannerUrl,
       whatsappPhone: restaurant.whatsappPhone ?? null,
+      planType: restaurant.planType,
+      limitProducts: Number(restaurant.limitProducts),
+      limitCategories: Number(restaurant.limitCategories),
       createdAt: restaurant.createdAt.toISOString(),
       updatedAt: restaurant.updatedAt.toISOString(),
     }

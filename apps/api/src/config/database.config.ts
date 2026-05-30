@@ -4,6 +4,7 @@ import { Restaurant } from '../modules/restaurants/entities/restaurant.entity.js
 import { Product } from '../modules/products/entities/product.entity.js'
 import { Review } from '../modules/reviews/entities/review.entity.js'
 import { Category } from '../modules/categories/entities/category.entity.js'
+import { Promotion } from '../modules/promotions/entities/promotion.entity.js'
 
 export const getDatabaseConfig = (config: ConfigService): TypeOrmModuleOptions => ({
   type: 'postgres',
@@ -12,7 +13,7 @@ export const getDatabaseConfig = (config: ConfigService): TypeOrmModuleOptions =
   username: config.get('DB_USERNAME', 'postgres'),
   password: config.get('DB_PASSWORD', 'postgres'),
   database: config.get('DB_NAME', 'kozmo_cardapio'),
-  entities: [Restaurant, Product, Review, Category],
+  entities: [Restaurant, Product, Review, Category, Promotion],
   synchronize: config.get('NODE_ENV') !== 'production',
   logging: config.get('NODE_ENV') === 'development',
   ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,

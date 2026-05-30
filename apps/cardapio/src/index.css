@@ -26,10 +26,112 @@
     --ring: 25 95% 53%;
     --radius: 0.75rem;
     --warm-bg: 30 40% 96%;
+
+    /* Accessibility: font scale (JS sets this via style prop, 1 = default) */
+    --font-scale: 1;
+  }
+
+  /* Scale the root font-size so all rem-based Tailwind utilities scale together */
+  html {
+    font-size: calc(16px * var(--font-scale, 1));
+  }
+
+  /* High contrast mode — overrides CSS-variable-based utilities */
+  html.high-contrast {
+    --background: 215 28% 17%;
+    --foreground: 0 0% 100%;
+    --card: 215 25% 20%;
+    --card-foreground: 0 0% 100%;
+    --popover: 215 28% 17%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 30 100% 60%;
+    --primary-foreground: 215 28% 10%;
+    --secondary: 215 25% 27%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 215 25% 27%;
+    --muted-foreground: 0 0% 85%;
+    --accent: 215 25% 27%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 55%;
+    --input: 0 0% 55%;
+    --ring: 30 100% 60%;
+    --warm-bg: 222 47% 11%;
+  }
+
+  /* Sidebar and slate-based components under high contrast */
+  html.high-contrast .bg-slate-800,
+  html.high-contrast .bg-slate-900 {
+    background-color: #1e293b !important;
+    border-color: #666 !important;
+  }
+  html.high-contrast .bg-slate-100 {
+    background-color: #253547 !important;
+  }
+  html.high-contrast .text-slate-400,
+  html.high-contrast .text-slate-500 {
+    color: #ccc !important;
+  }
+  html.high-contrast .border-slate-700,
+  html.high-contrast .border-slate-200 {
+    border-color: #666 !important;
+  }
+  html.high-contrast .hover\:bg-slate-700:hover {
+    background-color: #334155 !important;
+  }
+  html.high-contrast .bg-orange-500 {
+    background-color: #ff8c00 !important;
+    color: #1e293b !important;
+  }
+
+  /* General white/gray backgrounds */
+  html.high-contrast .bg-white {
+    background-color: #1e293b !important;
+    color: #fff !important;
+  }
+  html.high-contrast .bg-gray-50 {
+    background-color: #0f172a !important;
+  }
+  html.high-contrast .bg-gray-100 {
+    background-color: #1e293b !important;
+  }
+  html.high-contrast .bg-gray-200 {
+    background-color: #253547 !important;
+  }
+
+  /* Gray text overrides */
+  html.high-contrast .text-gray-900,
+  html.high-contrast .text-gray-800,
+  html.high-contrast .text-gray-700 {
+    color: #fff !important;
+  }
+  html.high-contrast .text-gray-600,
+  html.high-contrast .text-gray-500,
+  html.high-contrast .text-gray-400 {
+    color: #bbb !important;
+  }
+
+  /* Borders */
+  html.high-contrast .border-gray-200,
+  html.high-contrast .border-gray-100 {
+    border-color: #444 !important;
+  }
+
+  /* Nav tabs in menu */
+  html.high-contrast .bg-white.border-b {
+    background-color: #1e293b !important;
+    border-color: #444 !important;
   }
 
   * {
     border-color: hsl(var(--border));
+  }
+
+  /* Visible focus ring for keyboard navigation (applies globally) */
+  :focus-visible {
+    outline: 3px solid hsl(var(--ring));
+    outline-offset: 2px;
   }
 
   body {
@@ -38,6 +140,11 @@
     font-family: Inter, system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
+}
+
+@keyframes toast-shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
 }
 
 @layer utilities {

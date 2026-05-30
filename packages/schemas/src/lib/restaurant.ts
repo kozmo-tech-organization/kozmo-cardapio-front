@@ -16,6 +16,9 @@ export const RestaurantSchema = z.object({
   logoUrl: z.string().url().nullable(),
   bannerUrl: z.string().url().nullable(),
   whatsappPhone: z.string().nullable(),
+  planType: z.enum(['FREE', 'BASIC', 'PREMIUM']),
+  limitProducts: z.number().int(),
+  limitCategories: z.number().int(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 })

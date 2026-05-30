@@ -1,6 +1,6 @@
 # Kozmo Cardápio
 
-Plataforma SaaS de cardápio virtual para restaurantes. Cada restaurante tem seu próprio painel administrativo e um cardápio público acessível via QR Code.
+Plataforma SaaS de cardápio virtual para restaurantes. Cada restaurante tem seu próprio painel administrativo com sidebar e um cardápio público acessível via QR Code, com suporte a categorias, temas personalizados e sistema de planos.
 
 ## Stack
 
@@ -12,9 +12,10 @@ Plataforma SaaS de cardápio virtual para restaurantes. Cada restaurante tem seu
 | Backend | NestJS 11 + TypeScript |
 | Banco de dados | PostgreSQL + TypeORM |
 | Autenticação | JWT (Bearer token) |
-| API | oRPC (tipagem end-to-end) |
-| Validação | Zod |
+| API | oRPC v1 (tipagem end-to-end) |
+| Validação | Zod v3 |
 | Estado assíncrono | TanStack Query v5 |
+| i18n | Contexto React customizado (pt / en / es) |
 
 ---
 
@@ -37,14 +38,14 @@ pnpm install
 # 2. Suba o banco de dados
 docker compose up -d
 
-# 3. Backend (porta 3001) — abre em um terminal
+# 3. Backend (porta 3001) — abra em um terminal
 pnpm --filter @repo/api dev
 
-# 4. Frontend (porta 5173) — abre em outro terminal
+# 4. Frontend (porta 5173) — abra em outro terminal
 pnpm --filter @repo/cardapio dev
 ```
 
-> Na primeira execução, o TypeORM cria todas as tabelas automaticamente. Nenhuma migration manual é necessária.
+> Na primeira execução, o TypeORM cria todas as tabelas automaticamente com `synchronize: true`. Nenhuma migration manual é necessária em desenvolvimento.
 
 Acesse `http://localhost:5173` e crie sua conta de restaurante.
 
@@ -55,57 +56,63 @@ Acesse `http://localhost:5173` e crie sua conta de restaurante.
 ```
 kozmo-cardapio-front/
 ├── apps/
-│   ├── api/                  # Backend NestJS
-│   └── cardapio/             # Frontend React
+│   ├── api/                  # Backend NestJS (porta 3001)
+│   └── cardapio/             # Frontend React (porta 5173)
 ├── packages/
-│   ├── schemas/              # Schemas Zod compartilhados
-│   ├── server/               # Cliente oRPC tipado
+│   ├── schemas/              # Schemas e tipos Zod compartilhados
+│   ├── server/               # Cliente oRPC tipado (orpcClient)
 │   ├── queries/              # Hooks TanStack Query
 │   ├── features/             # Páginas e componentes por feature
-│   └── ui/                   # Design system
+│   ├── ui/                   # Design system (Button, Card, Badge...)
+│   └── i18n/                 # Traduções pt/en/es + hook useTranslation
+├── ARCHITECTURE.md           # Decisões técnicas e diagramas
+├── AI_CONTEXT.md             # Contexto para assistentes de IA
+├── CLAUDE.md                 # Instruções para o Claude Code
 ├── docker-compose.yml
 └── turbo.json
 ```
 
-### `apps/api` — Backend
+### `apps/api` — Backend NestJS
 
 ```
 src/
-├── main.ts                   # Bootstrap + oRPC middleware
-├── app.module.ts             # Módulo raiz
+├── main.ts                   # Bootstrap Express + oRPC middleware
+├── app.module.ts             # Módulo raiz (importa todos os módulos)
 ├── config/
-│   ├── database.config.ts    # Configuração TypeORM
-│   └── data-source.ts        # DataSource para migrations
+│   ├── database.config.ts    # Configuração TypeORM via env
+│   └── data-source.ts        # DataSource para CLI de migrations
 ├── modules/
-│   ├── auth/                 # Autenticação JWT
-│   ├── restaurants/          # Gestão de restaurantes
-│   ├── products/             # Gestão de produtos
-│   └── reviews/              # Avaliações dos clientes
+│   ├── auth/                 # Login, registro, expiração de plano
+│   ├── restaurants/          # CRUD + tema + slug
+│   ├── products/             # CRUD + limite por plano
+│   ├── categories/           # CRUD + limite por plano + relação M:M produtos
+│   └── reviews/              # Avaliações públicas de produtos
 └── orpc/
-    ├── context.ts            # Contexto por request (JWT)
+    ├── context.ts            # Extrai restaurant do JWT por request
     ├── middleware.ts          # publicProcedure / protectedProcedure
-    ├── router.ts             # Roteador principal
-    └── routers/              # Roteadores por domínio
+    ├── router.ts             # Roteador principal (compõe todos)
+    └── routers/              # Um arquivo por domínio
 ```
 
-### `apps/cardapio` — Frontend
+### `apps/cardapio` — Frontend React
 
 ```
 src/
-├── main.tsx                  # Bootstrap + providers
-├── App.tsx                   # Definição de rotas
-└── index.css                 # Variáveis CSS / tokens
+├── main.tsx                  # Bootstrap (QueryClient + AuthProvider + App)
+├── App.tsx                   # Definição de rotas (react-router)
+└── index.css                 # Variáveis CSS globais / tokens Tailwind
 ```
 
 ### `packages/`
 
 | Package | Responsabilidade |
 |---|---|
-| `@repo/schemas` | Tipos e validações Zod usados em todo o projeto |
-| `@repo/server` | `orpcClient` — cliente HTTP tipado para o backend |
-| `@repo/queries` | Hooks React Query (`useLogin`, `useProducts`, `useMenu`...) |
-| `@repo/features` | Páginas completas: auth, admin, menu público |
-| `@repo/ui` | Componentes reutilizáveis: Button, Input, Card, Badge... |
+| `@repo/schemas` | Schemas Zod + tipos TypeScript usados no backend e frontend |
+| `@repo/server` | `orpcClient` — cliente HTTP tipado; gerencia `authToken` em memória |
+| `@repo/queries` | Hooks React Query: `useLogin`, `useProducts`, `useCategories`, `useMenu`... |
+| `@repo/features` | Páginas completas: auth, admin (sidebar + rotas), menu público |
+| `@repo/ui` | Componentes reutilizáveis: `Button`, `Input`, `Card`, `Badge`, `Spinner`, `FormField` |
+| `@repo/i18n` | `I18nProvider`, `useTranslation`, JSONs de tradução por idioma |
 
 ---
 
@@ -141,12 +148,15 @@ VITE_API_URL=http://localhost:3001
 
 | Rota | Descrição | Acesso |
 |---|---|---|
+| `/` | Landing page | Público |
 | `/register` | Cadastro de novo restaurante | Público |
 | `/login` | Login do restaurante | Público |
+| `/menu/:slug` | Cardápio público para clientes | Público |
 | `/admin` | Dashboard do painel admin | Autenticado |
 | `/admin/products` | Gestão de produtos | Autenticado |
-| `/admin/settings` | Configurações do restaurante | Autenticado |
-| `/menu/:slug` | Cardápio público para clientes | Público |
+| `/admin/categories` | Gestão de categorias | Autenticado |
+| `/admin/visualizar` | Preview do cardápio (iframe) | Autenticado |
+| `/admin/settings` | Configurações e tema do restaurante | Autenticado |
 
 ---
 
@@ -166,7 +176,7 @@ Todos os procedimentos são acessados via `POST http://localhost:3001/rpc`.
 | Procedimento | Input | Output |
 |---|---|---|
 | `restaurant.me` | — | `Restaurant` |
-| `restaurant.update` | `{ name?, theme?, logoUrl?, bannerUrl? }` | `Restaurant` |
+| `restaurant.update` | `{ name?, theme?, logoUrl?, bannerUrl?, whatsappPhone? }` | `Restaurant` |
 
 ### Produtos (autenticado)
 
@@ -177,11 +187,23 @@ Todos os procedimentos são acessados via `POST http://localhost:3001/rpc`.
 | `products.update` | `{ id, ...campos opcionais }` | `Product` |
 | `products.delete` | `{ id }` | `{ success: true }` |
 
-### Cardápio (público)
+### Categorias (autenticado)
 
 | Procedimento | Input | Output |
 |---|---|---|
-| `menu.getBySlug` | `{ slug }` | `{ restaurant, products[] }` com avaliações |
+| `categories.list` | — | `Category[]` |
+| `categories.create` | `{ title, subtitle?, imageUrl?, order?, status? }` | `Category` |
+| `categories.update` | `{ id, ...campos opcionais }` | `Category` |
+| `categories.delete` | `{ id }` | `{ success: true }` |
+| `categories.setProducts` | `{ categoryId, productIds[] }` | `Category` |
+
+### Cardápio público (público)
+
+| Procedimento | Input | Output |
+|---|---|---|
+| `menu.getBySlug` | `{ slug }` | `{ restaurant, categories[], products[], uncategorizedProducts[] }` |
+
+> Retorna apenas produtos com `inStock: true` e categorias com `status: true`.
 
 ### Avaliações (público)
 
@@ -194,107 +216,136 @@ Todos os procedimentos são acessados via `POST http://localhost:3001/rpc`.
 
 ## Banco de dados
 
-### Tabelas criadas automaticamente
+### Entidades (TypeORM)
 
 ```
-restaurants   — id, email, passwordHash, name, slug, theme (JSONB), logoUrl, bannerUrl
-products      — id, restaurantId, name, price, preparationTimeMinutes, description, imageUrl, inStock
-reviews       — id, productId, clientName, comment, rating
+restaurants       — id, email, passwordHash, name, slug, theme (JSONB),
+                    logoUrl, bannerUrl, whatsappPhone, status, planType,
+                    limitProducts, limitCategories, paymentDay
+
+products          — id, restaurantId (FK), name, price, preparationTimeMinutes,
+                    description, imageUrl, inStock
+
+categories        — id, restaurantId (FK), title, subtitle, imageUrl, order, status
+
+category_products — categoryId (FK), productId (FK)   [tabela de junção M:M]
+
+reviews           — id, productId (FK), clientName, comment, rating
 ```
 
-> **Desenvolvimento:** `synchronize: true` no TypeORM — as tabelas são criadas/atualizadas automaticamente ao iniciar a API.
+> **Desenvolvimento:** `synchronize: true` — as tabelas são criadas/alteradas automaticamente ao iniciar a API.
 >
-> **Produção:** desabilite `synchronize` e use migrations geradas com `pnpm --filter @repo/api migration:generate`.
+> **Produção:** desabilite `synchronize` e use `pnpm --filter @repo/api migration:generate`.
+
+---
+
+## Sistema de planos
+
+Cada restaurante tem um `planType` (`FREE` | `BASIC` | `PREMIUM`) com limites numéricos:
+
+| Campo | Descrição |
+|---|---|
+| `limitProducts` | Máximo de produtos ativos (`inStock: true`) |
+| `limitCategories` | Máximo de categorias ativas (`status: true`) |
+| `paymentDay` | Data de expiração do plano |
+
+### Regras aplicadas
+
+- **No login:** se `planType !== 'FREE'` e `paymentDay` expirou → reseta para FREE, desativa todos os produtos e categorias do restaurante.
+- **Ao criar produto:** conta produtos existentes; bloqueia se atingir `limitProducts`.
+- **Ao ativar produto** (`inStock: false → true`): conta ativos; bloqueia se atingir `limitProducts`.
+- **Ao criar categoria:** conta categorias existentes; bloqueia se atingir `limitCategories`.
+- **Ao ativar categoria** (`status: false → true`): conta ativas; bloqueia se atingir `limitCategories`.
 
 ---
 
 ## Regras de negócio
 
-- Cada restaurante acessa o sistema com e-mail e senha
-- O slug do restaurante é gerado automaticamente a partir do nome (ex: `pizzaria-do-joao`)
-- Produtos com `inStock: false` **não aparecem** no cardápio público
-- Clientes podem avaliar produtos informando nome, comentário e nota (1–5 estrelas)
-- As avaliações ficam visíveis para todos os clientes do cardápio
+- Cada restaurante acessa o sistema com e-mail e senha (JWT salvo em `localStorage`).
+- O slug é gerado automaticamente do nome (ex: `pizzaria-do-joao`); garantido único.
+- Produtos com `inStock: false` **não aparecem** no cardápio público.
+- Categorias com `status: false` **não aparecem** no cardápio público.
+- O cardápio público aplica as cores do tema (`primaryColor`, `accentColor`) configuradas pelo restaurante.
+- Clientes podem avaliar produtos com nome, comentário e nota de 1–5 estrelas.
+- O cardápio suporta três idiomas: Português, English, Español (salvo em `localStorage`).
 
 ---
 
 ## QR Code
 
-O link do cardápio de cada restaurante segue o padrão:
+O link do cardápio segue o padrão:
 
 ```
 http://seu-dominio.com/menu/{slug}
 ```
 
-O slug aparece no dashboard do painel admin. Basta gerar um QR Code apontando para esse link e disponibilizá-lo nas mesas.
+O slug aparece no dashboard do painel admin. Gere um QR Code apontando para esse link e disponibilize nas mesas.
 
 ---
 
-## Desenvolvimento — comandos úteis
+## Comandos úteis
 
 ```bash
-# Instalar dependências de todos os packages
+# Instalar dependências (todos os workspaces)
 pnpm install
 
-# Rodar tudo em modo dev (backend + frontend)
-pnpm dev
+# Subir banco de dados
+docker compose up -d
 
-# Rodar apenas o backend
+# Backend em dev (porta 3001)
 pnpm --filter @repo/api dev
 
-# Rodar apenas o frontend
+# Frontend em dev (porta 5173)
 pnpm --filter @repo/cardapio dev
 
 # Build do frontend
 pnpm --filter @repo/cardapio build
 
-# Subir o banco de dados
-docker-compose up -d
-
-# Parar o banco de dados
-docker-compose down
+# Parar banco de dados
+docker compose down
 ```
 
 ---
 
 ## Adicionando um novo procedimento oRPC
 
-1. **Adicione o schema** em `packages/schemas/src/lib/`:
+1. **Schema** em `packages/schemas/src/lib/<dominio>.ts`:
 
 ```typescript
-// packages/schemas/src/lib/product.ts
-export const NewFeatureSchema = z.object({ ... })
+export const NovaEntidadeSchema = z.object({ ... })
+export type NovaEntidade = z.infer<typeof NovaEntidadeSchema>
 ```
 
-2. **Adicione o método no cliente** em `packages/server/src/orpc-client.ts`:
+2. **Cliente** em `packages/server/src/orpc-client.ts`:
 
 ```typescript
-newFeature: {
-  doSomething: (input: NewFeatureInput): Promise<NewFeatureOutput> =>
-    rpc.newFeature.doSomething(input),
+novoModulo: {
+  fazAlgo: (input: NovaEntidadeInput): Promise<NovaEntidade> =>
+    rpc.novoModulo.fazAlgo(input),
 }
 ```
 
-3. **Crie o hook** em `packages/queries/src/hooks/`:
+3. **Hook** em `packages/queries/src/hooks/use-novo-modulo.ts`:
 
 ```typescript
-export function useDoSomething() {
+export function useFazAlgo() {
   return useMutation({
-    mutationFn: (input: NewFeatureInput) => orpcClient.newFeature.doSomething(input),
+    mutationFn: (input: NovaEntidadeInput) => orpcClient.novoModulo.fazAlgo(input),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['novo-modulo'] }),
   })
 }
 ```
 
-4. **Implemente o roteador** em `apps/api/src/orpc/routers/`:
+4. **Roteador** em `apps/api/src/orpc/routers/novo-modulo.router.ts`:
 
 ```typescript
-export function createNewFeatureRouter(service: NewFeatureService) {
+export function createNovoModuloRouter(service: NovoModuloService) {
   return {
-    doSomething: publicProcedure
-      .input(NewFeatureSchema)
-      .handler(async ({ input }) => service.doSomething(input)),
+    fazAlgo: protectedProcedure
+      .input(NovaEntidadeSchema)
+      .handler(async ({ input, context }) => service.fazAlgo(context.restaurant.id, input)),
   }
 }
 ```
 
-5. **Registre no router principal** em `apps/api/src/orpc/router.ts`.
+5. **Registre** em `apps/api/src/orpc/router.ts` e exporte do `packages/queries/src/index.ts`.

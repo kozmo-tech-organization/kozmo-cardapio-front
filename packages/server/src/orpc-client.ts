@@ -16,6 +16,9 @@ import type {
   Category,
   CreateCategoryInput,
   UpdateCategoryInput,
+  Promotion,
+  CreatePromotionInput,
+  UpdatePromotionInput,
 } from '@repo/schemas'
 import { getRpcUrl, getAuthHeaders } from './http-client'
 
@@ -68,6 +71,16 @@ export const orpcClient = {
       rpc.categories.delete(input),
     setProducts: (input: { categoryId: string; productIds: string[] }): Promise<Category> =>
       rpc.categories.setProducts(input),
+  },
+  promotions: {
+    list: (): Promise<Promotion[]> => rpc.promotions.list(),
+    create: (input: CreatePromotionInput): Promise<Promotion> => rpc.promotions.create(input),
+    update: (input: { id: string } & UpdatePromotionInput): Promise<Promotion> =>
+      rpc.promotions.update(input),
+    delete: (input: { id: string }): Promise<{ success: boolean }> =>
+      rpc.promotions.delete(input),
+    setProducts: (input: { promotionId: string; productIds: string[] }): Promise<Promotion> =>
+      rpc.promotions.setProducts(input),
   },
 }
 

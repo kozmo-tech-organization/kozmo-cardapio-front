@@ -17,13 +17,22 @@ export const MenuCategorySchema = z.object({
   products: z.array(MenuProductSchema),
 })
 
+export const MenuPromotionSchema = z.object({
+  id: z.string().uuid(),
+  name: z.string(),
+  discountPercent: z.number(),
+  productIds: z.array(z.string().uuid()),
+})
+
 export const MenuSchema = z.object({
   restaurant: RestaurantSchema,
   categories: z.array(MenuCategorySchema),
   products: z.array(MenuProductSchema),
   uncategorizedProducts: z.array(MenuProductSchema),
+  promotions: z.array(MenuPromotionSchema),
 })
 
 export type MenuProduct = z.infer<typeof MenuProductSchema>
 export type MenuCategory = z.infer<typeof MenuCategorySchema>
+export type MenuPromotion = z.infer<typeof MenuPromotionSchema>
 export type Menu = z.infer<typeof MenuSchema>
