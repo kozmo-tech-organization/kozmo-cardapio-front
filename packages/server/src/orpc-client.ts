@@ -19,6 +19,9 @@ import type {
   Promotion,
   CreatePromotionInput,
   UpdatePromotionInput,
+  Order,
+  CreateOrderInput,
+  UpdateOrderStatusInput,
 } from '@repo/schemas'
 import { getRpcUrl, getAuthHeaders } from './http-client'
 
@@ -81,6 +84,11 @@ export const orpcClient = {
       rpc.promotions.delete(input),
     setProducts: (input: { promotionId: string; productIds: string[] }): Promise<Promotion> =>
       rpc.promotions.setProducts(input),
+  },
+  orders: {
+    create: (input: CreateOrderInput): Promise<Order> => rpc.orders.create(input),
+    list: (): Promise<Order[]> => rpc.orders.list(),
+    updateStatus: (input: UpdateOrderStatusInput): Promise<Order> => rpc.orders.updateStatus(input),
   },
 }
 

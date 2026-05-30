@@ -135,7 +135,7 @@ export function PromotionsPage() {
     return (
       <div className="max-w-2xl space-y-6">
         <div className="flex items-center gap-3">
-          <button onClick={back} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={back} className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
             {t('admin.promotions.back')}
           </button>
         </div>
@@ -206,7 +206,7 @@ export function PromotionsPage() {
     return (
       <div className="max-w-xl space-y-6">
         <div className="flex items-center gap-3">
-          <button onClick={back} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <button onClick={back} className="cursor-pointer text-sm text-muted-foreground hover:text-foreground transition-colors">
             {t('admin.promotions.back')}
           </button>
         </div>

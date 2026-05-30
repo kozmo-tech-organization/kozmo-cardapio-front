@@ -27,6 +27,37 @@ export function ViewMenuPage() {
         <p className="text-muted-foreground mt-1">{t('admin.viewMenu.subtitle')}</p>
       </div>
 
+      {restaurant?.slug && (
+        <div className="flex gap-3 flex-wrap">
+          <a
+            href={`/print/${restaurant.slug}?format=simple`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect width="12" height="8" x="6" y="14" />
+            </svg>
+            {t('admin.viewMenu.printSimple')}
+          </a>
+          <a
+            href={`/print/${restaurant.slug}?format=digital`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true">
+              <polyline points="6 9 6 2 18 2 18 9" />
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+              <rect width="12" height="8" x="6" y="14" />
+            </svg>
+            {t('admin.viewMenu.printDigital')}
+          </a>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
           <CardHeader>
@@ -39,7 +70,7 @@ export function ViewMenuPage() {
             <div className="flex gap-2">
               <button
                 onClick={copyLink}
-                className="flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
+                className="cursor-pointer flex flex-1 items-center justify-center gap-2 rounded-lg border border-border bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
               >
                 {copied ? (
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-green-500">
@@ -75,7 +106,7 @@ export function ViewMenuPage() {
             <CardTitle className="text-base">{t('admin.viewMenu.qrCode')}</CardTitle>
             <button
               onClick={() => setShowQr((v) => !v)}
-              className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
+              className="cursor-pointer flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50"
             >
               {showQr ? t('admin.viewMenu.hideQr') : t('admin.viewMenu.showQr')}
             </button>

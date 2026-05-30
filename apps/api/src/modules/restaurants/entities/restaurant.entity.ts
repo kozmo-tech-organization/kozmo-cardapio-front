@@ -43,6 +43,15 @@ export class Restaurant {
   @Column({ nullable: true, type: 'varchar' })
   whatsappPhone: string | null
 
+  @Column({ type: 'boolean', default: false })
+  ordersEnabled: boolean
+
+  @Column({ type: 'boolean', default: false })
+  deliveryEnabled: boolean
+
+  @Column({ type: 'boolean', default: false })
+  tableEnabled: boolean
+
   @OneToMany(() => Product, (product) => product.restaurant)
   products: Product[]
 

@@ -16,6 +16,9 @@ export const RestaurantSchema = z.object({
   logoUrl: z.string().url().nullable(),
   bannerUrl: z.string().url().nullable(),
   whatsappPhone: z.string().nullable(),
+  ordersEnabled: z.boolean().default(false),
+  deliveryEnabled: z.boolean().default(false),
+  tableEnabled: z.boolean().default(false),
   planType: z.enum(['FREE', 'BASIC', 'PREMIUM']),
   limitProducts: z.number().int(),
   limitCategories: z.number().int(),
@@ -29,6 +32,9 @@ export const UpdateRestaurantSchema = z.object({
   logoUrl: z.string().url().nullable().optional(),
   bannerUrl: z.string().url().nullable().optional(),
   whatsappPhone: z.string().nullable().optional(),
+  ordersEnabled: z.boolean().optional(),
+  deliveryEnabled: z.boolean().optional(),
+  tableEnabled: z.boolean().optional(),
 })
 
 export type Theme = z.infer<typeof ThemeSchema>

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router'
-import { useCurrentRestaurant, useLogout } from '@repo/queries'
+import { useCurrentRestaurant, useLogout, useOrders } from '@repo/queries'
+import { useOrdersSocket } from './useOrdersSocket'
 import { useTranslation, type Language } from '@repo/i18n'
 
 function hexToHsl(hex: string): string {
@@ -75,6 +76,29 @@ const NAV_KEYS = [
     ),
   },
   {
+    to: '/admin/reports',
+    labelKey: 'admin.nav.reports',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true" focusable="false">
+        <line x1="18" x2="18" y1="20" y2="10" />
+        <line x1="12" x2="12" y1="20" y2="4" />
+        <line x1="6" x2="6" y1="20" y2="14" />
+      </svg>
+    ),
+  },
+  {
+    to: '/admin/orders',
+    labelKey: 'admin.nav.orders',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true" focusable="false">
+        <path d="M9 5H2v7l6.29 6.29c.94.94 2.48.94 3.42 0l3.58-3.58c.94-.94.94-2.48 0-3.42L9 5Z" />
+        <path d="M6 9.01V9" />
+        <rect x="13" y="2" width="9" height="9" rx="1" />
+        <path d="m16 6 1.5 1.5L20 5" />
+      </svg>
+    ),
+  },
+  {
     to: '/admin/visualizar',
     labelKey: 'admin.nav.view',
     icon: (
@@ -115,7 +139,7 @@ function LanguageSelector() {
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-label={t(`lang.${lang}`)}
-        className="flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+        className="cursor-pointer flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-sm font-medium text-white/70 hover:bg-white/10 hover:text-white transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
       >
         <span aria-hidden="true">{LANG_FLAGS[lang]}</span>
         <span>{LANG_LABELS[lang]}</span>
@@ -142,7 +166,7 @@ function LanguageSelector() {
             <li key={l} role="option" aria-selected={lang === l}>
               <button
                 onClick={() => { setLang(l); setOpen(false) }}
-                className={`flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:bg-orange-50 ${
+                className={`cursor-pointer flex w-full items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors hover:bg-orange-50 focus-visible:outline-none focus-visible:bg-orange-50 ${
                   lang === l ? 'bg-orange-50 text-orange-600 font-medium' : 'text-gray-700'
                 }`}
               >
@@ -175,6 +199,10 @@ export function AdminLayout() {
       ? location.pathname === item.to
       : location.pathname.startsWith(item.to)
   }
+
+  useOrdersSocket()
+  const { data: orders } = useOrders()
+  const pendingCount = orders?.filter((o) => o.status === 'pending').length ?? 0
 
   const primaryColor = restaurant?.theme?.primaryColor || '#f97316'
   const primaryHsl = hexToHsl(primaryColor)
@@ -221,6 +249,11 @@ export function AdminLayout() {
             >
               {item.icon}
               {t(item.labelKey)}
+              {item.to === '/admin/orders' && pendingCount > 0 && (
+                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-white/30 px-1.5 text-xs font-bold text-white">
+                  {pendingCount}
+                </span>
+              )}
             </Link>
           )
         })}
@@ -237,7 +270,7 @@ export function AdminLayout() {
         </div>
         <button
           onClick={handleLogout}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-red-500/20 hover:text-red-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
+          className="cursor-pointer flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-white/70 hover:bg-red-500/20 hover:text-red-200 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
         >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true" focusable="false">
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -297,7 +330,7 @@ export function AdminLayout() {
             aria-label={mobileOpen ? 'Fechar menu' : 'Abrir menu'}
             aria-expanded={mobileOpen}
             aria-controls="mobile-sidebar"
-            className="flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-md text-muted-foreground hover:bg-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-hidden="true" focusable="false">
               <line x1="4" x2="20" y1="6" y2="6" />

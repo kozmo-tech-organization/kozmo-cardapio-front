@@ -3,17 +3,27 @@ import { Card, CardContent, Badge, Button, FormField, Label } from '@repo/ui'
 import { useCreateReview } from '@repo/queries'
 import { useTranslation } from '@repo/i18n'
 import type { MenuProduct } from '@repo/schemas'
+import { useCart } from './CartContext'
 
 interface ProductCardProps {
   product: MenuProduct
   accentColor?: string
   primaryColor?: string
   discountPercent?: number
+  ordersEnabled?: boolean
 }
 
-export function ProductCard({ product, accentColor, primaryColor, discountPercent }: ProductCardProps) {
+export function ProductCard({ product, accentColor, primaryColor, discountPercent, ordersEnabled }: ProductCardProps) {
   const createReview = useCreateReview()
   const { t } = useTranslation()
+  const { addItem, removeItem, updateQuantity, items } = useCart()
+
+  const effectivePrice = discountPercent
+    ? Number(product.price) * (1 - discountPercent / 100)
+    : Number(product.price)
+
+  const cartItem = items.find((i) => i.product.id === product.id)
+  const cartCount = cartItem?.quantity ?? 0
   const [showReview, setShowReview] = useState(false)
   const [reviewForm, setReviewForm] = useState({ clientName: '', comment: '', rating: 5 })
   const [reviewSent, setReviewSent] = useState(false)
@@ -30,62 +40,132 @@ export function ProductCard({ product, accentColor, primaryColor, discountPercen
     setReviewForm({ clientName: '', comment: '', rating: 5 })
   }
 
+  const btnColor = primaryColor || accentColor || '#f97316'
+
   return (
     <article aria-label={product.name}>
-      <Card className="overflow-hidden h-full">
-        {product.imageUrl && (
-          <img
-            src={product.imageUrl}
-            alt={product.name}
-            className="h-48 w-full object-cover"
-          />
-        )}
-        <CardContent className="p-4 space-y-3">
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="font-semibold text-lg">{product.name}</h3>
+      <Card className="overflow-hidden h-full flex flex-col">
+        {product.imageUrl ? (
+          <div className="relative shrink-0">
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="h-44 w-full object-cover"
+            />
+            {discountPercent && (
+              <span
+                className="absolute top-2 left-2 text-xs font-bold px-2 py-0.5 rounded-full text-white shadow"
+                style={{ backgroundColor: btnColor }}
+              >
+                -{discountPercent}%
+              </span>
+            )}
             {product.averageRating && (
               <span
-                className="flex items-center gap-1 text-sm font-medium text-yellow-600"
-                aria-label={`Nota ${product.averageRating} de 5, ${product.reviews.length} ${product.reviews.length === 1 ? t('admin.dashboard.review.one') : t('admin.dashboard.review.other')}`}
+                className="absolute top-2 right-2 flex items-center gap-0.5 text-xs font-bold bg-black/60 text-white px-2 py-0.5 rounded-full backdrop-blur-sm"
+                aria-label={`Nota ${product.averageRating} de 5`}
               >
                 <span aria-hidden="true">★ {product.averageRating}</span>
-                <span className="text-muted-foreground font-normal" aria-hidden="true">
-                  ({product.reviews.length})
-                </span>
               </span>
             )}
           </div>
+        ) : null}
 
-          <p className="text-sm text-muted-foreground">{product.description}</p>
+        <CardContent className="p-4 flex flex-col flex-1 gap-3">
+          <div>
+            {!product.imageUrl && product.averageRating && (
+              <div className="flex items-center justify-between gap-2 mb-1">
+                <h3 className="font-semibold text-base leading-snug">{product.name}</h3>
+                <span
+                  className="flex items-center gap-1 text-sm font-medium text-yellow-600 shrink-0"
+                  aria-label={`Nota ${product.averageRating} de 5`}
+                >
+                  <span aria-hidden="true">★ {product.averageRating}</span>
+                  <span className="text-muted-foreground font-normal" aria-hidden="true">
+                    ({product.reviews.length})
+                  </span>
+                </span>
+              </div>
+            )}
+            {(product.imageUrl || !product.averageRating) && (
+              <h3 className="font-semibold text-base leading-snug">{product.name}</h3>
+            )}
+            {product.description && (
+              <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{product.description}</p>
+            )}
+          </div>
 
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-end justify-between gap-2">
+            <div className="flex flex-col">
               {discountPercent ? (
                 <>
-                  <span className="text-sm text-muted-foreground line-through">
+                  <span className="text-xs text-muted-foreground line-through leading-none">
                     R$ {Number(product.price).toFixed(2)}
                   </span>
                   <span
-                    className="text-xl font-bold"
-                    style={primaryColor ? { color: primaryColor } : {}}
+                    className="text-xl font-bold leading-tight"
+                    style={{ color: btnColor }}
                   >
-                    R$ {(Number(product.price) * (1 - discountPercent / 100)).toFixed(2)}
-                  </span>
-                  <span
-                    className="text-xs font-semibold px-1.5 py-0.5 rounded-full text-white"
-                    style={{ backgroundColor: primaryColor || '#f97316' }}
-                  >
-                    -{discountPercent}%
+                    R$ {effectivePrice.toFixed(2)}
                   </span>
                 </>
               ) : (
                 <span className="text-xl font-bold" style={accentColor ? { color: accentColor } : {}}>
-                  R$ {Number(product.price).toFixed(2)}
+                  R$ {effectivePrice.toFixed(2)}
                 </span>
               )}
             </div>
-            <Badge variant="outline">~{product.preparationTimeMinutes} min</Badge>
+            <Badge variant="outline" className="shrink-0 mb-0.5">~{product.preparationTimeMinutes} min</Badge>
           </div>
+
+          <div className="flex-1" />
+
+          {ordersEnabled && product.inStock && (
+            cartCount > 0 ? (
+              <div
+                className="flex items-center w-full rounded-xl overflow-hidden border-2"
+                style={{ borderColor: btnColor }}
+                role="group"
+                aria-label={`Quantidade de ${product.name} no carrinho`}
+              >
+                <button
+                  type="button"
+                  onClick={() => cartCount <= 1 ? removeItem(product.id) : updateQuantity(product.id, cartCount - 1)}
+                  aria-label={t('menu.cart.decrease')}
+                  className="cursor-pointer flex-1 py-2.5 font-bold text-xl flex items-center justify-center transition-colors hover:bg-black/5"
+                  style={{ color: btnColor }}
+                >
+                  −
+                </button>
+                <span
+                  className="font-bold text-sm px-3 py-2.5 text-white min-w-10 text-center"
+                  aria-live="polite"
+                  style={{ backgroundColor: btnColor }}
+                >
+                  {cartCount}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => addItem(product, effectivePrice)}
+                  aria-label={t('menu.cart.increase')}
+                  className="cursor-pointer flex-1 py-2.5 font-bold text-xl flex items-center justify-center transition-colors hover:bg-black/5"
+                  style={{ color: btnColor }}
+                >
+                  +
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => addItem(product, effectivePrice)}
+                aria-label={t('menu.cart.addItem', { name: product.name })}
+                className="cursor-pointer w-full py-2.5 rounded-xl text-white font-semibold text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 shadow-sm"
+                style={{ backgroundColor: btnColor }}
+              >
+                <span aria-hidden="true">+</span> {t('menu.cart.add')}
+              </button>
+            )
+          )}
 
           {product.reviews.length > 0 && (
             <div className="space-y-2 border-t pt-3">
@@ -160,7 +240,7 @@ export function ProductCard({ product, accentColor, primaryColor, discountPercen
                       onClick={() => setReviewField('rating', star)}
                       aria-label={`${star} ${star === 1 ? 'estrela' : 'estrelas'}`}
                       aria-pressed={star <= reviewForm.rating}
-                      className={`text-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded ${
+                      className={`cursor-pointer text-2xl transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded ${
                         star <= reviewForm.rating ? 'text-yellow-400' : 'text-muted-foreground/30'
                       }`}
                     >

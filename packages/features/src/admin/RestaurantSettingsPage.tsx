@@ -17,6 +17,9 @@ export function RestaurantSettingsPage() {
     logoUrl: '',
     bannerUrl: '',
     whatsappPhone: '',
+    ordersEnabled: false,
+    deliveryEnabled: false,
+    tableEnabled: false,
   })
   useEffect(() => {
     if (restaurant?.theme) {
@@ -28,6 +31,9 @@ export function RestaurantSettingsPage() {
         logoUrl: restaurant.logoUrl ?? '',
         bannerUrl: restaurant.bannerUrl ?? '',
         whatsappPhone: restaurant.whatsappPhone ?? '',
+        ordersEnabled: restaurant.ordersEnabled ?? false,
+        deliveryEnabled: restaurant.deliveryEnabled ?? false,
+        tableEnabled: restaurant.tableEnabled ?? false,
       })
     }
   }, [restaurant])
@@ -49,6 +55,9 @@ export function RestaurantSettingsPage() {
         logoUrl: form.logoUrl || null,
         bannerUrl: form.bannerUrl || null,
         whatsappPhone: form.whatsappPhone || null,
+        ordersEnabled: form.ordersEnabled,
+        deliveryEnabled: form.deliveryEnabled,
+        tableEnabled: form.tableEnabled,
       })
       toast({ variant: 'success', title: t('admin.settings.savedToast') })
     } catch {
@@ -101,6 +110,66 @@ export function RestaurantSettingsPage() {
               onChange={(e) => setField('whatsappPhone', e.target.value)}
               placeholder={t('admin.settings.whatsappPhonePlaceholder')}
             />
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('admin.settings.orders.title')}</CardTitle>
+            <CardDescription>{t('admin.settings.orders.subtitle')}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <label className="flex items-center justify-between gap-4 cursor-pointer">
+              <div>
+                <p className="text-sm font-medium">{t('admin.settings.orders.enableOrders')}</p>
+                <p className="text-xs text-muted-foreground mt-0.5">{t('admin.settings.orders.enableOrdersHint')}</p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={form.ordersEnabled}
+                onClick={() => setForm((prev) => ({ ...prev, ordersEnabled: !prev.ordersEnabled, deliveryEnabled: !prev.ordersEnabled ? prev.deliveryEnabled : false, tableEnabled: !prev.ordersEnabled ? prev.tableEnabled : false }))}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${form.ordersEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
+              >
+                <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${form.ordersEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </label>
+
+            {form.ordersEnabled && (
+              <>
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <div>
+                    <p className="text-sm font-medium">{t('admin.settings.orders.enableDelivery')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('admin.settings.orders.enableDeliveryHint')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={form.deliveryEnabled}
+                    onClick={() => setForm((prev) => ({ ...prev, deliveryEnabled: !prev.deliveryEnabled }))}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${form.deliveryEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
+                  >
+                    <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${form.deliveryEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </label>
+
+                <label className="flex items-center justify-between gap-4 cursor-pointer">
+                  <div>
+                    <p className="text-sm font-medium">{t('admin.settings.orders.enableTable')}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t('admin.settings.orders.enableTableHint')}</p>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={form.tableEnabled}
+                    onClick={() => setForm((prev) => ({ ...prev, tableEnabled: !prev.tableEnabled }))}
+                    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${form.tableEnabled ? 'bg-green-500' : 'bg-gray-300'}`}
+                  >
+                    <span className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg ring-0 transition-transform ${form.tableEnabled ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </label>
+              </>
+            )}
           </CardContent>
         </Card>
 

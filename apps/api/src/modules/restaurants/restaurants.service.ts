@@ -30,6 +30,9 @@ export class RestaurantsService {
     if (input.logoUrl !== undefined) restaurant.logoUrl = input.logoUrl
     if (input.bannerUrl !== undefined) restaurant.bannerUrl = input.bannerUrl
     if (input.whatsappPhone !== undefined) restaurant.whatsappPhone = input.whatsappPhone
+    if (input.ordersEnabled !== undefined) restaurant.ordersEnabled = input.ordersEnabled
+    if (input.deliveryEnabled !== undefined) restaurant.deliveryEnabled = input.deliveryEnabled
+    if (input.tableEnabled !== undefined) restaurant.tableEnabled = input.tableEnabled
     if (input.theme) {
       restaurant.theme = { ...restaurant.theme, ...input.theme }
     }
@@ -47,6 +50,9 @@ export class RestaurantsService {
       logoUrl: restaurant.logoUrl,
       bannerUrl: restaurant.bannerUrl,
       whatsappPhone: restaurant.whatsappPhone ?? null,
+      ordersEnabled: restaurant.ordersEnabled,
+      deliveryEnabled: restaurant.deliveryEnabled,
+      tableEnabled: restaurant.tableEnabled,
       planType: restaurant.planType,
       limitProducts: Number(restaurant.limitProducts),
       limitCategories: Number(restaurant.limitCategories),

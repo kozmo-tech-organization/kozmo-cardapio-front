@@ -149,7 +149,7 @@ export function CategoriesPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={cancelForm}
-            className="text-muted-foreground hover:text-foreground text-sm"
+            className="cursor-pointer text-muted-foreground hover:text-foreground text-sm"
           >
             {t('admin.categories.back')}
           </button>
@@ -227,7 +227,7 @@ export function CategoriesPage() {
         <div className="flex items-center gap-3">
           <button
             onClick={() => setView('list')}
-            className="text-muted-foreground hover:text-foreground text-sm"
+            className="cursor-pointer text-muted-foreground hover:text-foreground text-sm"
           >
             {t('admin.categories.back')}
           </button>
@@ -263,7 +263,7 @@ export function CategoriesPage() {
                     key={product.id}
                     type="button"
                     onClick={() => toggleProduct(product.id)}
-                    className={`text-left rounded-xl border p-4 transition-all ${
+                    className={`cursor-pointer text-left rounded-xl border p-4 transition-all ${
                       selected
                         ? 'border-primary bg-primary/5 ring-1 ring-primary'
                         : 'border-border hover:border-muted-foreground'

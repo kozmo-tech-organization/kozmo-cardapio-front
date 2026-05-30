@@ -10,7 +10,10 @@ import {
   CategoriesPage,
   PromotionsPage,
   ViewMenuPage,
+  OrdersPage,
+  ReportsPage,
   MenuPage,
+  PrintMenuPage,
   ProtectedRoute,
   AccessibilityProvider,
   AccessibilityToolbar,
@@ -31,6 +34,7 @@ export default function App() {
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/menu/:slug" element={<MenuPage />} />
+            <Route path="/print/:slug" element={<PrintMenuPage />} />
 
             <Route
               path="/admin"
@@ -45,6 +49,8 @@ export default function App() {
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="promotions" element={<PromotionsPage />} />
               <Route path="visualizar" element={<ViewMenuPage />} />
+              <Route path="orders" element={<OrdersPage />} />
+              <Route path="reports" element={<ReportsPage />} />
               <Route path="settings" element={<RestaurantSettingsPage />} />
             </Route>
 

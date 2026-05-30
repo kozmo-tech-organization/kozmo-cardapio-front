@@ -16,7 +16,7 @@ export function AccessibilityToolbar() {
       {/* Skip-to-content link: visible only on keyboard focus */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-orange-500 focus:px-4 focus:py-2 focus:text-sm focus:font-semibold focus:text-white focus:shadow-lg"
+        className="fixed top-2 left-2 z-9999 -translate-y-20 rounded-lg bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-lg transition-transform focus-visible:translate-y-0"
       >
         {t('a11y.skipToContent')}
       </a>
@@ -39,14 +39,14 @@ export function AccessibilityToolbar() {
                 disabled={atMin}
                 aria-label={t('a11y.fontSize.decrease')}
                 aria-disabled={atMin}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-xs font-bold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-xs font-bold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 A-
               </button>
               <button
                 onClick={resetFontSize}
                 aria-label={t('a11y.fontSize.reset')}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-sm font-bold text-gray-700 transition-colors hover:bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 A
               </button>
@@ -55,7 +55,7 @@ export function AccessibilityToolbar() {
                 disabled={atMax}
                 aria-label={t('a11y.fontSize.increase')}
                 aria-disabled={atMax}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-base font-bold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                className="cursor-pointer flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 text-base font-bold text-gray-700 transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
               >
                 A+
               </button>
@@ -67,7 +67,7 @@ export function AccessibilityToolbar() {
               aria-pressed={highContrast}
               aria-label={highContrast ? t('a11y.contrast.disable') : t('a11y.contrast.enable')}
               className={[
-                'flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500',
+                'cursor-pointer flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500',
                 highContrast
                   ? 'border-gray-900 bg-gray-900 text-white'
                   : 'border-gray-200 text-gray-700 hover:bg-gray-100',
@@ -98,7 +98,7 @@ export function AccessibilityToolbar() {
           aria-controls="a11y-panel"
           aria-label={t('a11y.toolbar.toggle')}
           title={t('a11y.toolbar.toggle')}
-          className="flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-lg text-gray-600 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+          className="cursor-pointer flex h-10 w-10 items-center justify-center rounded-full border border-gray-200 bg-white shadow-lg text-gray-600 transition-colors hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
         >
           {/* Accessibility / person icon */}
           <svg

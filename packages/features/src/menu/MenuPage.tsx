@@ -4,6 +4,8 @@ import { useMenu } from '@repo/queries'
 import { Spinner } from '@repo/ui'
 import { useTranslation, type Language } from '@repo/i18n'
 import { ProductCard } from './ProductCard'
+import { CartProvider, useCart } from './CartContext'
+import { CartDrawer } from './CartDrawer'
 import type { MenuCategory, MenuProduct } from '@repo/schemas'
 
 const LANG_FLAGS: Record<Language, string> = { pt: '🇧🇷', en: '🇺🇸', es: '🇪🇸' }
@@ -100,7 +102,7 @@ function WhatsAppWidget({ phone }: { phone: string }) {
             <div className="flex gap-2 justify-end">
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-full border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                className="cursor-pointer rounded-full border border-gray-300 px-4 py-1.5 text-sm text-gray-600 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
               >
                 {t('menu.whatsapp.no')}
               </button>
@@ -131,12 +133,14 @@ function WhatsAppWidget({ phone }: { phone: string }) {
   )
 }
 
-export function MenuPage() {
+function MenuContent() {
   const { slug } = useParams<{ slug: string }>()
   const { data: menu, isLoading, isError } = useMenu(slug ?? '')
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
+  const [cartOpen, setCartOpen] = useState(false)
+  const { count } = useCart()
 
   if (isLoading) {
     return (
@@ -264,7 +268,7 @@ export function MenuPage() {
               <button
                 onClick={() => setSearch('')}
                 aria-label="Limpar busca"
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 rounded"
+                className="cursor-pointer absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 rounded"
               >
                 <span aria-hidden="true">✕</span>
               </button>
@@ -285,7 +289,7 @@ export function MenuPage() {
                 role="tab"
                 aria-selected={selectedCategoryId === null}
                 onClick={() => setSelectedCategoryId(null)}
-                className="shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                className="cursor-pointer shrink-0 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                 style={
                   selectedCategoryId === null
                     ? { backgroundColor: primaryColor, color: secondaryColor || '#fff' }
@@ -301,7 +305,7 @@ export function MenuPage() {
                   role="tab"
                   aria-selected={selectedCategoryId === cat.id}
                   onClick={() => setSelectedCategoryId(cat.id)}
-                  className="shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
+                  className="cursor-pointer shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400"
                   style={
                     selectedCategoryId === cat.id
                       ? { backgroundColor: primaryColor, color: secondaryColor || '#fff' }
@@ -333,7 +337,7 @@ export function MenuPage() {
               <p className="text-gray-500 text-lg">{t('menu.noResults', { query: search })}</p>
               <button
                 onClick={() => setSearch('')}
-                className="mt-3 text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded"
+                className="cursor-pointer mt-3 text-sm font-medium hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-400 rounded"
                 style={{ color: accentColor }}
               >
                 {t('menu.clearSearch')}
@@ -350,7 +354,7 @@ export function MenuPage() {
               <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 list-none p-0">
                 {displayUncategorized.map((product) => (
                   <li key={product.id}>
-                    <ProductCard product={product} accentColor={accentColor} primaryColor={primaryColor} discountPercent={discountMap.get(product.id)} />
+                    <ProductCard product={product} accentColor={accentColor} primaryColor={primaryColor} discountPercent={discountMap.get(product.id)} ordersEnabled={restaurant.ordersEnabled} />
                   </li>
                 ))}
               </ul>
@@ -391,7 +395,7 @@ export function MenuPage() {
                   <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 list-none p-0">
                     {category.products.map((product) => (
                       <li key={product.id}>
-                        <ProductCard product={product} accentColor={accentColor} primaryColor={primaryColor} discountPercent={discountMap.get(product.id)} />
+                        <ProductCard product={product} accentColor={accentColor} primaryColor={primaryColor} discountPercent={discountMap.get(product.id)} ordersEnabled={restaurant.ordersEnabled} />
                       </li>
                     ))}
                   </ul>
@@ -416,7 +420,7 @@ export function MenuPage() {
                 <ul className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 list-none p-0">
                   {displayUncategorized.map((product) => (
                     <li key={product.id}>
-                      <ProductCard product={product} accentColor={accentColor} primaryColor={primaryColor} discountPercent={discountMap.get(product.id)} />
+                      <ProductCard product={product} accentColor={accentColor} primaryColor={primaryColor} discountPercent={discountMap.get(product.id)} ordersEnabled={restaurant.ordersEnabled} />
                     </li>
                   ))}
                 </ul>
@@ -436,7 +440,47 @@ export function MenuPage() {
         </footer>
       </main>
 
+      {restaurant.ordersEnabled && restaurant.whatsappPhone && (
+        <CartDrawer
+          open={cartOpen}
+          onClose={() => setCartOpen(false)}
+          restaurantId={restaurant.id}
+          whatsappPhone={restaurant.whatsappPhone}
+          deliveryEnabled={restaurant.deliveryEnabled}
+          tableEnabled={restaurant.tableEnabled}
+          primaryColor={primaryColor}
+          accentColor={accentColor}
+        />
+      )}
+
+      {restaurant.ordersEnabled && restaurant.whatsappPhone && count > 0 && (
+        <div
+          className={`fixed z-40 transition-all duration-300 ${restaurant.whatsappPhone ? 'bottom-24' : 'bottom-6'} right-6`}
+        >
+          <button
+            onClick={() => setCartOpen(true)}
+            aria-label={t('menu.cart.openCart', { count })}
+            className="cursor-pointer flex items-center gap-2 rounded-full px-5 py-3 text-white font-semibold shadow-xl hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
+            style={{ backgroundColor: primaryColor }}
+          >
+            <span aria-hidden="true">🛒</span>
+            <span>{t('menu.cart.viewCart')}</span>
+            <span className="flex h-5 w-5 items-center justify-center rounded-full text-xs font-bold" style={{ backgroundColor: accentColor }}>
+              {count}
+            </span>
+          </button>
+        </div>
+      )}
+
       {restaurant.whatsappPhone && <WhatsAppWidget phone={restaurant.whatsappPhone} />}
     </div>
+  )
+}
+
+export function MenuPage() {
+  return (
+    <CartProvider>
+      <MenuContent />
+    </CartProvider>
   )
 }
