@@ -84,6 +84,7 @@ export class ProductsService {
       description: product.description,
       imageUrl: product.imageUrl,
       inStock: product.inStock,
+      options: product.options ?? [],
       createdAt: product.createdAt.toISOString(),
       updatedAt: product.updatedAt.toISOString(),
     }

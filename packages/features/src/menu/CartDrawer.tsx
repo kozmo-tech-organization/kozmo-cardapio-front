@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { useCart } from './CartContext'
 import { useTranslation } from '@repo/i18n'
 import { Button, FormField, useToast } from '@repo/ui'
-import { useCreateOrder } from '@repo/queries'
+import { useCreateOrder, useValidateCoupon } from '@repo/queries'
 
 interface CheckoutModalProps {
   restaurantId: string
@@ -11,15 +11,17 @@ interface CheckoutModalProps {
   tableEnabled: boolean
   primaryColor: string
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (orderId: string) => void
 }
 
 function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, onClose, onSuccess }: CheckoutModalProps) {
-  const { items, total } = useCart()
+  const { items, subtotal, total, discountAmount, appliedCoupon, setAppliedCoupon, clear } = useCart()
   const { t } = useTranslation()
   const createOrder = useCreateOrder()
+  const validateCoupon = useValidateCoupon()
   const { toast } = useToast()
   const submittingRef = useRef(false)
+  const [couponInput, setCouponInput] = useState('')
   const [form, setForm] = useState({
     name: '',
     phone: '',
@@ -30,6 +32,25 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
 
   function setField(field: string, value: string) {
     setForm((prev) => ({ ...prev, [field]: value }))
+  }
+
+  async function handleApplyCoupon() {
+    if (!couponInput.trim()) return
+    try {
+      const result = await validateCoupon.mutateAsync({
+        restaurantId,
+        code: couponInput.trim(),
+        orderTotal: subtotal,
+      })
+      if (result.valid) {
+        setAppliedCoupon({ code: couponInput.trim().toUpperCase(), result })
+        toast({ variant: 'success', title: `Cupom aplicado! Desconto: R$ ${result.discountAmount.toFixed(2).replace('.', ',')}` })
+      } else {
+        toast({ variant: 'error', title: result.message ?? 'Cupom inválido' })
+      }
+    } catch {
+      toast({ variant: 'error', title: 'Erro ao validar cupom' })
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -53,8 +74,12 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
           productName: i.product.name,
           quantity: i.quantity,
           unitPrice: i.effectivePrice,
+          selectedOptions: i.selectedOptions,
+          observation: i.observation,
         })),
         total,
+        discountAmount,
+        couponCode: appliedCoupon?.code,
       })
     } catch {
       submittingRef.current = false
@@ -80,9 +105,19 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
         const unitFmt = item.effectivePrice.toFixed(2).replace('.', ',')
         const totalFmt = (item.effectivePrice * item.quantity).toFixed(2).replace('.', ',')
         lines.push(`• ${item.quantity}x *${item.product.name}*`)
+        if (item.selectedOptions.length > 0) {
+          lines.push(`  ${item.selectedOptions.map((o) => o.itemName).join(', ')}`)
+        }
+        if (item.observation) {
+          lines.push(`  Obs: ${item.observation}`)
+        }
         lines.push(`  R$ ${unitFmt} cada = R$ ${totalFmt}`)
       }
       lines.push(`━━━━━━━━━━━━━━━━`)
+      if (discountAmount > 0) {
+        lines.push(`*Subtotal:* R$ ${subtotal.toFixed(2).replace('.', ',')}`)
+        lines.push(`*Desconto (${appliedCoupon?.code}):* -R$ ${discountAmount.toFixed(2).replace('.', ',')}`)
+      }
       lines.push(`*${t('menu.cart.whatsappTotal')}:* R$ ${total.toFixed(2).replace('.', ',')}`)
       lines.push(`━━━━━━━━━━━━━━━━`)
       lines.push('')
@@ -99,7 +134,8 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
     }
 
     submittingRef.current = false
-    onSuccess()
+    clear()
+    onSuccess(createdOrder.id)
   }
 
   const isDelivery = deliveryEnabled && form.type === 'delivery'
@@ -112,7 +148,7 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-4"
+      className="fixed inset-0 z-60 flex items-end sm:items-center justify-center p-4"
       role="dialog"
       aria-modal="true"
       aria-label={t('menu.cart.checkoutTitle')}
@@ -193,7 +229,61 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
             />
           )}
 
-          <div className="pt-2 border-t border-gray-100">
+          {/* Coupon */}
+          <div className="space-y-1.5">
+            <p className="text-sm font-medium text-gray-700">{t('menu.cart.coupon')}</p>
+            {appliedCoupon ? (
+              <div className="flex items-center justify-between rounded-lg bg-green-50 border border-green-200 px-3 py-2">
+                <div>
+                  <span className="text-sm font-bold text-green-700">{appliedCoupon.code}</span>
+                  <span className="text-xs text-green-600 ml-2">
+                    -{appliedCoupon.result.discountAmount > 0
+                      ? `R$ ${appliedCoupon.result.discountAmount.toFixed(2).replace('.', ',')}`
+                      : ''}
+                  </span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => { setAppliedCoupon(null); setCouponInput('') }}
+                  className="cursor-pointer text-xs text-red-500 hover:text-red-700 ml-2"
+                >
+                  Remover
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value.toUpperCase())}
+                  placeholder={t('menu.cart.couponPlaceholder')}
+                  className="flex-1 rounded-lg border border-gray-200 px-3 py-2 text-sm uppercase focus:outline-none focus:ring-2 focus:ring-gray-300"
+                />
+                <button
+                  type="button"
+                  onClick={handleApplyCoupon}
+                  disabled={!couponInput.trim() || validateCoupon.isPending}
+                  className="cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  {validateCoupon.isPending ? '...' : t('menu.cart.couponApply')}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div className="pt-2 border-t border-gray-100 space-y-1">
+            {discountAmount > 0 && (
+              <>
+                <div className="flex items-center justify-between text-sm text-gray-500">
+                  <span>{t('menu.cart.subtotal')}</span>
+                  <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div className="flex items-center justify-between text-sm text-green-600">
+                  <span>Desconto ({appliedCoupon?.code})</span>
+                  <span>-R$ {discountAmount.toFixed(2).replace('.', ',')}</span>
+                </div>
+              </>
+            )}
             <div className="flex items-center justify-between mb-4">
               <span className="text-sm font-medium text-gray-500">{t('menu.cart.total')}</span>
               <span className="text-xl font-bold text-gray-900">
@@ -240,14 +330,50 @@ interface CartDrawerProps {
   tableEnabled: boolean
   primaryColor: string
   accentColor: string
+  slug: string
 }
 
-export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, accentColor }: CartDrawerProps) {
-  const { items, removeItem, updateQuantity, total, clear } = useCart()
+export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, accentColor, slug }: CartDrawerProps) {
+  const { items, removeItem, updateQuantity, subtotal, total, discountAmount, appliedCoupon, clear } = useCart()
   const { t } = useTranslation()
   const [checkoutOpen, setCheckoutOpen] = useState(false)
+  const [completedOrderId, setCompletedOrderId] = useState<string | null>(null)
 
   if (!open) return null
+
+  if (completedOrderId) {
+    const trackUrl = `${window.location.origin}/track/${completedOrderId}`
+    return (
+      <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4">
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => { setCompletedOrderId(null); onClose() }} aria-hidden="true" />
+        <div className="relative w-full sm:w-96 bg-white rounded-2xl shadow-2xl p-6 space-y-4 text-center">
+          <div className="text-5xl" aria-hidden="true">🎉</div>
+          <h2 className="text-xl font-bold text-gray-900">{t('menu.cart.orderPlaced')}</h2>
+          <p className="text-sm text-gray-500">{t('menu.cart.trackOrderHint')}</p>
+          <div className="rounded-lg bg-gray-50 border border-gray-200 px-3 py-2 text-xs text-gray-600 break-all select-all">
+            {trackUrl}
+          </div>
+          <div className="flex gap-2">
+            <a
+              href={trackUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 rounded-lg py-2.5 text-sm font-semibold text-white text-center"
+              style={{ backgroundColor: primaryColor }}
+            >
+              {t('menu.cart.trackOrder')}
+            </a>
+            <button
+              onClick={() => { setCompletedOrderId(null); onClose() }}
+              className="cursor-pointer flex-1 rounded-lg border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+            >
+              {t('menu.cart.close')}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <>
@@ -284,7 +410,7 @@ export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliver
             <>
               <ul className="flex-1 overflow-y-auto divide-y divide-gray-100 px-5">
                 {items.map((item) => (
-                  <li key={item.product.id} className="py-4 flex gap-3">
+                  <li key={item.cartKey} className="py-4 flex gap-3">
                     {item.product.imageUrl && (
                       <img
                         src={item.product.imageUrl}
@@ -294,12 +420,20 @@ export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliver
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-sm text-gray-900 truncate">{item.product.name}</p>
+                      {item.selectedOptions.length > 0 && (
+                        <p className="text-xs text-gray-500 truncate">
+                          {item.selectedOptions.map((o) => o.itemName).join(', ')}
+                        </p>
+                      )}
+                      {item.observation && (
+                        <p className="text-xs text-gray-400 italic truncate">Obs: {item.observation}</p>
+                      )}
                       <p className="text-sm font-bold mt-0.5" style={{ color: accentColor }}>
                         R$ {(item.effectivePrice * item.quantity).toFixed(2).replace('.', ',')}
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                         <button
-                          onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
+                          onClick={() => updateQuantity(item.cartKey, item.quantity - 1)}
                           aria-label={t('menu.cart.decrease')}
                           className="cursor-pointer flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 text-sm"
                         >
@@ -307,14 +441,14 @@ export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliver
                         </button>
                         <span className="w-5 text-center text-sm font-medium">{item.quantity}</span>
                         <button
-                          onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                          onClick={() => updateQuantity(item.cartKey, item.quantity + 1)}
                           aria-label={t('menu.cart.increase')}
                           className="cursor-pointer flex h-6 w-6 items-center justify-center rounded-full border border-gray-300 text-gray-600 hover:bg-gray-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400 text-sm"
                         >
                           +
                         </button>
                         <button
-                          onClick={() => removeItem(item.product.id)}
+                          onClick={() => removeItem(item.cartKey)}
                           aria-label={t('menu.cart.remove')}
                           className="cursor-pointer ml-auto text-red-400 hover:text-red-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 rounded text-xs"
                         >
@@ -327,6 +461,18 @@ export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliver
               </ul>
 
               <div className="px-5 py-4 border-t border-gray-100 space-y-3 shrink-0">
+                {discountAmount > 0 && (
+                  <div className="space-y-1 text-sm">
+                    <div className="flex items-center justify-between text-gray-500">
+                      <span>{t('menu.cart.subtotal')}</span>
+                      <span>R$ {subtotal.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-green-600 font-medium">
+                      <span>Cupom {appliedCoupon?.code}</span>
+                      <span>-R$ {discountAmount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                  </div>
+                )}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">{t('menu.cart.total')}</span>
                   <span className="text-xl font-bold text-gray-900">
@@ -360,10 +506,9 @@ export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliver
           tableEnabled={tableEnabled}
           primaryColor={primaryColor}
           onClose={() => setCheckoutOpen(false)}
-          onSuccess={() => {
+          onSuccess={(orderId) => {
             setCheckoutOpen(false)
-            clear()
-            onClose()
+            setCompletedOrderId(orderId)
           }}
         />
       )}

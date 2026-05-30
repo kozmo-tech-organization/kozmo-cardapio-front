@@ -450,6 +450,7 @@ function MenuContent() {
           tableEnabled={restaurant.tableEnabled}
           primaryColor={primaryColor}
           accentColor={accentColor}
+          slug={restaurant.slug}
         />
       )}
 

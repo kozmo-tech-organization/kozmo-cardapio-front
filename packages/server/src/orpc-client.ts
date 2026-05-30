@@ -22,6 +22,12 @@ import type {
   Order,
   CreateOrderInput,
   UpdateOrderStatusInput,
+  CustomerSummary,
+  Coupon,
+  CreateCouponInput,
+  UpdateCouponInput,
+  ValidateCouponInput,
+  ValidateCouponResult,
 } from '@repo/schemas'
 import { getRpcUrl, getAuthHeaders } from './http-client'
 
@@ -88,7 +94,16 @@ export const orpcClient = {
   orders: {
     create: (input: CreateOrderInput): Promise<Order> => rpc.orders.create(input),
     list: (): Promise<Order[]> => rpc.orders.list(),
+    getById: (input: { id: string }): Promise<Order> => rpc.orders.getById(input),
+    customers: (): Promise<CustomerSummary[]> => rpc.orders.customers(),
     updateStatus: (input: UpdateOrderStatusInput): Promise<Order> => rpc.orders.updateStatus(input),
+  },
+  coupons: {
+    list: (): Promise<Coupon[]> => rpc.coupons.list(),
+    create: (input: CreateCouponInput): Promise<Coupon> => rpc.coupons.create(input),
+    update: (input: { id: string } & UpdateCouponInput): Promise<Coupon> => rpc.coupons.update(input),
+    delete: (input: { id: string }): Promise<{ success: boolean }> => rpc.coupons.delete(input),
+    validate: (input: ValidateCouponInput): Promise<ValidateCouponResult> => rpc.coupons.validate(input),
   },
 }
 

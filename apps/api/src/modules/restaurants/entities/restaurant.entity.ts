@@ -52,6 +52,9 @@ export class Restaurant {
   @Column({ type: 'boolean', default: false })
   tableEnabled: boolean
 
+  @Column({ type: 'int', default: 0 })
+  tablesCount: number
+
   @OneToMany(() => Product, (product) => product.restaurant)
   products: Product[]
 

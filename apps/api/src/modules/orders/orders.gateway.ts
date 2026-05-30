@@ -3,6 +3,9 @@ import {
   WebSocketServer,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  SubscribeMessage,
+  MessageBody,
+  ConnectedSocket,
 } from '@nestjs/websockets'
 import { Server, Socket } from 'socket.io'
 import { JwtService } from '@nestjs/jwt'
@@ -25,18 +28,25 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
       client.handshake.query?.token as string
 
     if (!token) {
-      client.disconnect()
+      // Unauthenticated clients can still join specific order rooms via event
       return
     }
     try {
       const payload = this.jwtService.verify<{ restaurantId: string }>(token)
       client.join(`restaurant:${payload.restaurantId}`)
     } catch {
-      client.disconnect()
+      // Invalid token — allow connection for public order tracking
     }
   }
 
   handleDisconnect(_client: Socket) {}
+
+  @SubscribeMessage('track:order')
+  handleTrackOrder(@MessageBody() orderId: string, @ConnectedSocket() client: Socket) {
+    if (orderId && typeof orderId === 'string') {
+      client.join(`order:${orderId}`)
+    }
+  }
 
   emitOrderCreated(restaurantId: string, order: object) {
     this.server.to(`restaurant:${restaurantId}`).emit('order:created', order)
@@ -44,5 +54,9 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   emitOrderUpdated(restaurantId: string, order: object) {
     this.server.to(`restaurant:${restaurantId}`).emit('order:updated', order)
+  }
+
+  emitOrderStatusToCustomer(orderId: string, order: object) {
+    this.server.to(`order:${orderId}`).emit('order:status', order)
   }
 }

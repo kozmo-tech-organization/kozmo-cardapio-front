@@ -7,6 +7,7 @@ export const MenuProductSchema = ProductSchema.extend({
   reviews: z.array(ReviewSchema),
   averageRating: z.number().nullable(),
 })
+// options already included from ProductSchema
 
 export const MenuCategorySchema = z.object({
   id: z.string().uuid(),

@@ -47,6 +47,16 @@ export class Product {
   @Column({ type: 'boolean', default: true })
   inStock: boolean
 
+  @Column({ type: 'jsonb', default: [] })
+  options: Array<{
+    id: string
+    name: string
+    required: boolean
+    min: number
+    max: number
+    items: Array<{ id: string; name: string; priceAdd: number }>
+  }>
+
   @OneToMany(() => Review, (review) => review.product)
   reviews: Review[]
 

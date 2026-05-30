@@ -19,6 +19,7 @@ export const RestaurantSchema = z.object({
   ordersEnabled: z.boolean().default(false),
   deliveryEnabled: z.boolean().default(false),
   tableEnabled: z.boolean().default(false),
+  tablesCount: z.number().int().min(0).default(0),
   planType: z.enum(['FREE', 'BASIC', 'PREMIUM']),
   limitProducts: z.number().int(),
   limitCategories: z.number().int(),
@@ -35,6 +36,7 @@ export const UpdateRestaurantSchema = z.object({
   ordersEnabled: z.boolean().optional(),
   deliveryEnabled: z.boolean().optional(),
   tableEnabled: z.boolean().optional(),
+  tablesCount: z.number().int().min(0).optional(),
 })
 
 export type Theme = z.infer<typeof ThemeSchema>

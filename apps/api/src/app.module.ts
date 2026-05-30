@@ -9,6 +9,7 @@ import { ReviewsModule } from './modules/reviews/reviews.module'
 import { CategoriesModule } from './modules/categories/categories.module'
 import { PromotionsModule } from './modules/promotions/promotions.module'
 import { OrdersModule } from './modules/orders/orders.module'
+import { CouponsModule } from './modules/coupons/coupons.module'
 import { RpcMiddleware } from './orpc/rpc.middleware'
 
 @Module({
@@ -25,6 +26,7 @@ import { RpcMiddleware } from './orpc/rpc.middleware'
     CategoriesModule,
     PromotionsModule,
     OrdersModule,
+    CouponsModule,
   ],
 })
 export class AppModule implements NestModule {

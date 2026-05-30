@@ -1,5 +1,5 @@
 import { publicProcedure, protectedProcedure } from '../middleware'
-import { CreateOrderSchema, UpdateOrderStatusSchema } from '@repo/schemas'
+import { CreateOrderSchema, UpdateOrderStatusSchema, GetOrderByIdSchema } from '@repo/schemas'
 import type { OrdersService } from '../../modules/orders/orders.service'
 
 export function createOrdersRouter(ordersService: OrdersService) {
@@ -15,6 +15,18 @@ export function createOrdersRouter(ordersService: OrdersService) {
       .handler(async ({ context }) => {
         const orders = await ordersService.findByRestaurant(context.restaurant.id)
         return orders.map((o) => ordersService.toPublic(o))
+      }),
+
+    getById: publicProcedure
+      .input(GetOrderByIdSchema)
+      .handler(async ({ input }) => {
+        const order = await ordersService.findById(input.id)
+        return ordersService.toPublic(order)
+      }),
+
+    customers: protectedProcedure
+      .handler(async ({ context }) => {
+        return ordersService.getCustomers(context.restaurant.id)
       }),
 
     updateStatus: protectedProcedure

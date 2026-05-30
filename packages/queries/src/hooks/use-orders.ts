@@ -3,6 +3,7 @@ import { orpcClient } from '@repo/server'
 import type { CreateOrderInput, UpdateOrderStatusInput } from '@repo/schemas'
 
 const ORDERS_KEY = ['orders']
+const CUSTOMERS_KEY = ['customers']
 
 export function useOrders() {
   return useQuery({
@@ -10,6 +11,24 @@ export function useOrders() {
     queryFn: () => orpcClient.orders.list(),
     refetchOnWindowFocus: true,
     staleTime: 30_000,
+  })
+}
+
+export function useOrderById(id: string | null) {
+  return useQuery({
+    queryKey: ['order', id],
+    queryFn: () => orpcClient.orders.getById({ id: id! }),
+    enabled: !!id,
+    refetchOnWindowFocus: true,
+    staleTime: Infinity,
+  })
+}
+
+export function useCustomers() {
+  return useQuery({
+    queryKey: CUSTOMERS_KEY,
+    queryFn: () => orpcClient.orders.customers(),
+    staleTime: 60_000,
   })
 }
 
@@ -26,6 +45,7 @@ export function useUpdateOrderStatus() {
     mutationFn: (input: UpdateOrderStatusInput) => orpcClient.orders.updateStatus(input),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ORDERS_KEY })
+      queryClient.invalidateQueries({ queryKey: CUSTOMERS_KEY })
     },
   })
 }

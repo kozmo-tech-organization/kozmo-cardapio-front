@@ -12,8 +12,12 @@ import {
   ViewMenuPage,
   OrdersPage,
   ReportsPage,
+  CalendarPage,
+  CouponsPage,
+  CustomersPage,
   MenuPage,
   PrintMenuPage,
+  OrderTrackingPage,
   ProtectedRoute,
   AccessibilityProvider,
   AccessibilityToolbar,
@@ -35,6 +39,7 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/menu/:slug" element={<MenuPage />} />
             <Route path="/print/:slug" element={<PrintMenuPage />} />
+            <Route path="/track/:orderId" element={<OrderTrackingPage />} />
 
             <Route
               path="/admin"
@@ -48,9 +53,12 @@ export default function App() {
               <Route path="products" element={<ProductsPage />} />
               <Route path="categories" element={<CategoriesPage />} />
               <Route path="promotions" element={<PromotionsPage />} />
+              <Route path="coupons" element={<CouponsPage />} />
+              <Route path="customers" element={<CustomersPage />} />
               <Route path="visualizar" element={<ViewMenuPage />} />
               <Route path="orders" element={<OrdersPage />} />
               <Route path="reports" element={<ReportsPage />} />
+              <Route path="calendar" element={<CalendarPage />} />
               <Route path="settings" element={<RestaurantSettingsPage />} />
             </Route>
 

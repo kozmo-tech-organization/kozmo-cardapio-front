@@ -23,6 +23,8 @@ export class OrdersService {
       tableNumber: input.tableNumber ?? null,
       items: input.items,
       total: input.total,
+      discountAmount: input.discountAmount ?? 0,
+      couponCode: input.couponCode ?? null,
       status: 'pending',
     })
     const saved = await this.ordersRepository.save(order)
@@ -37,6 +39,50 @@ export class OrdersService {
     })
   }
 
+  async findById(id: string) {
+    const order = await this.ordersRepository.findOne({ where: { id } })
+    if (!order) throw new NotFoundException('Order not found')
+    return order
+  }
+
+  async getCustomers(restaurantId: string) {
+    const orders = await this.ordersRepository.find({
+      where: { restaurantId },
+      order: { createdAt: 'DESC' },
+    })
+
+    const map = new Map<string, {
+      customerName: string
+      customerPhone: string
+      ordersCount: number
+      totalSpent: number
+      lastOrderAt: string
+    }>()
+
+    for (const o of orders) {
+      const key = o.customerPhone
+      if (!map.has(key)) {
+        map.set(key, {
+          customerName: o.customerName,
+          customerPhone: o.customerPhone,
+          ordersCount: 0,
+          totalSpent: 0,
+          lastOrderAt: o.createdAt.toISOString(),
+        })
+      }
+      const entry = map.get(key)!
+      entry.ordersCount += 1
+      entry.totalSpent += Number(o.total)
+      if (new Date(o.createdAt) > new Date(entry.lastOrderAt)) {
+        entry.lastOrderAt = o.createdAt.toISOString()
+      }
+    }
+
+    return Array.from(map.values()).sort(
+      (a, b) => new Date(b.lastOrderAt).getTime() - new Date(a.lastOrderAt).getTime(),
+    )
+  }
+
   async updateStatus(input: UpdateOrderStatusInput, restaurantId: string) {
     const order = await this.ordersRepository.findOne({ where: { id: input.id } })
     if (!order) throw new NotFoundException('Order not found')
@@ -44,6 +90,7 @@ export class OrdersService {
     order.status = input.status
     const saved = await this.ordersRepository.save(order)
     this.ordersGateway?.emitOrderUpdated(saved.restaurantId, this.toPublic(saved))
+    this.ordersGateway?.emitOrderStatusToCustomer(saved.id, this.toPublic(saved))
     return saved
   }
 
@@ -58,6 +105,8 @@ export class OrdersService {
       tableNumber: order.tableNumber,
       items: order.items,
       total: Number(order.total),
+      discountAmount: Number(order.discountAmount ?? 0),
+      couponCode: order.couponCode ?? null,
       status: order.status,
       createdAt: order.createdAt.toISOString(),
       updatedAt: order.updatedAt.toISOString(),

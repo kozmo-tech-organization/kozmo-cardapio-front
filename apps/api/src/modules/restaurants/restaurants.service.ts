@@ -33,6 +33,7 @@ export class RestaurantsService {
     if (input.ordersEnabled !== undefined) restaurant.ordersEnabled = input.ordersEnabled
     if (input.deliveryEnabled !== undefined) restaurant.deliveryEnabled = input.deliveryEnabled
     if (input.tableEnabled !== undefined) restaurant.tableEnabled = input.tableEnabled
+    if (input.tablesCount !== undefined) restaurant.tablesCount = input.tablesCount
     if (input.theme) {
       restaurant.theme = { ...restaurant.theme, ...input.theme }
     }
@@ -53,6 +54,7 @@ export class RestaurantsService {
       ordersEnabled: restaurant.ordersEnabled,
       deliveryEnabled: restaurant.deliveryEnabled,
       tableEnabled: restaurant.tableEnabled,
+      tablesCount: restaurant.tablesCount ?? 0,
       planType: restaurant.planType,
       limitProducts: Number(restaurant.limitProducts),
       limitCategories: Number(restaurant.limitCategories),
