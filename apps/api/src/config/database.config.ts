@@ -9,11 +9,11 @@ import { Order } from '../modules/orders/entities/order.entity.js'
 
 export const getDatabaseConfig = (config: ConfigService): TypeOrmModuleOptions => ({
   type: 'postgres',
-  host: config.get('DB_HOST', 'localhost'),
-  port: config.get<number>('DB_PORT', 5432),
-  username: config.get('DB_USERNAME', 'postgres'),
-  password: config.get('DB_PASSWORD', 'postgres'),
-  database: config.get('DB_NAME', 'kozmo_cardapio'),
+  host: config.get('PGHOST', 'localhost'),
+  port: config.get<number>('PGPORT', 5432),
+  username: config.get('PGUSER', 'postgres'),
+  password: config.get('PGPASSWORD', 'postgres'),
+  database: config.get('PGDATABASE', 'kozmo_cardapio'),
   entities: [Restaurant, Product, Review, Category, Promotion, Order],
   synchronize: config.get('NODE_ENV') !== 'production',
   logging: config.get('NODE_ENV') === 'development',
