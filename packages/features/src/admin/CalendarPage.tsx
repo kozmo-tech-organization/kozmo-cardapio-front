@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useCurrentRestaurant } from '@repo/queries'
 import { Card, CardContent } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'

@@ -333,7 +333,7 @@ interface CartDrawerProps {
   slug: string
 }
 
-export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, accentColor, slug }: CartDrawerProps) {
+export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, accentColor, slug: _slug }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, subtotal, total, discountAmount, appliedCoupon, clear } = useCart()
   const { t } = useTranslation()
   const [checkoutOpen, setCheckoutOpen] = useState(false)

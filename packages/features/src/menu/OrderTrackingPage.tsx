@@ -51,7 +51,7 @@ function StatusTimeline({ status }: { status: OrderStatus }) {
                         ? 'bg-green-500 text-white'
                         : 'bg-gray-100 text-gray-400'
                   }`}
-                  style={isCurrent ? { backgroundColor: '#f97316', color: '#fff', ringColor: '#fed7aa' } : {}}
+                  style={isCurrent ? { backgroundColor: '#f97316', color: '#fff' } : {}}
                 >
                   {isDone ? '✓' : <span aria-hidden="true">{info.emoji}</span>}
                 </div>
@@ -88,7 +88,7 @@ export function OrderTrackingPage() {
   useEffect(() => {
     if (!orderId) return
 
-    const apiUrl = (import.meta as { env: Record<string, string> }).env?.VITE_API_URL ?? 'http://localhost:3001'
+    const apiUrl = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? 'http://localhost:3001'
     const socket = io(apiUrl, { transports: ['websocket', 'polling'] })
     socketRef.current = socket
 

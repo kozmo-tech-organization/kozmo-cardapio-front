@@ -5,9 +5,7 @@ import type { Order } from '@repo/schemas'
 
 const API_URL =
   typeof window !== 'undefined'
-    ? (import.meta as Record<string, unknown>).env
-        ? ((import.meta as Record<string, unknown>).env as Record<string, string>).VITE_API_URL ?? 'http://localhost:3001'
-        : 'http://localhost:3001'
+    ? (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? 'http://localhost:3001'
     : 'http://localhost:3001'
 
 const ORDERS_KEY = ['orders']
