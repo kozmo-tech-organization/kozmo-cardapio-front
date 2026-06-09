@@ -10,9 +10,11 @@ import { CategoriesModule } from './modules/categories/categories.module'
 import { PromotionsModule } from './modules/promotions/promotions.module'
 import { OrdersModule } from './modules/orders/orders.module'
 import { CouponsModule } from './modules/coupons/coupons.module'
+import { HealthController } from './health.controller'
 import { RpcMiddleware } from './orpc/rpc.middleware'
 
 @Module({
+  controllers: [HealthController],
   imports: [
     ConfigModule.forRoot({ isGlobal: true, envFilePath: '.env' }),
     TypeOrmModule.forRootAsync({
