@@ -15,7 +15,7 @@ export const getDatabaseConfig = (config: ConfigService): TypeOrmModuleOptions =
   password: config.get('PGPASSWORD', 'postgres'),
   database: config.get('PGDATABASE', 'kozmo_cardapio'),
   entities: [Restaurant, Product, Review, Category, Promotion, Order],
-  synchronize: config.get('NODE_ENV') !== 'production',
+  synchronize: true,
   logging: config.get('NODE_ENV') === 'development',
   ssl: config.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
 })
