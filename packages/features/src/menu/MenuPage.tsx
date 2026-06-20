@@ -1,7 +1,8 @@
-import { useState } from 'react'
-import { useParams } from 'react-router'
-import { useMenu } from '@repo/queries'
-import { Spinner } from '@repo/ui'
+import { useState, useEffect } from 'react'
+import { useParams, useSearchParams } from 'react-router'
+import { useMenu, useTableById, useCreateWaiterCall, useWaiterCallStatus, useSetWaiterCallStatus } from '@repo/queries'
+import { useWaiterCallSocket } from './useWaiterCallSocket'
+import { Spinner, useToast } from '@repo/ui'
 import { useTranslation, type Language } from '@repo/i18n'
 import { ProductCard } from './ProductCard'
 import { CartProvider, useCart } from './CartContext'
@@ -133,9 +134,150 @@ function WhatsAppWidget({ phone }: { phone: string }) {
   )
 }
 
+const STATUS_COLORS: Record<string, string> = {
+  pending: '#f59e0b',
+  accepted: '#10b981',
+  waiting: '#3b82f6',
+  completed: '#10b981',
+  declined: '#ef4444',
+}
+
+const COOLDOWN_MS = 5 * 60 * 1000
+
+function callStorageKey(tableId: string) { return `wc_call_${tableId}` }
+function cooldownStorageKey(tableId: string) { return `wc_cooldown_${tableId}` }
+
+function WaiterCallButton({ restaurantId, tableId, tableNumber, tableName, primaryColor }: {
+  restaurantId: string
+  tableId: string
+  tableNumber: number
+  tableName: string
+  primaryColor: string
+}) {
+  const { t } = useTranslation()
+  const { toast } = useToast()
+  const createWaiterCall = useCreateWaiterCall()
+  const setWaiterCallStatus = useSetWaiterCallStatus()
+
+  const [callId, setCallIdState] = useState<string | null>(() =>
+    sessionStorage.getItem(callStorageKey(tableId))
+  )
+  const [cooldownUntil, setCooldownUntilState] = useState<number | null>(() => {
+    const stored = sessionStorage.getItem(cooldownStorageKey(tableId))
+    if (!stored) return null
+    const ts = parseInt(stored, 10)
+    return ts > Date.now() ? ts : null
+  })
+  const [remaining, setRemaining] = useState(0)
+
+  const { data: callStatus } = useWaiterCallStatus(callId)
+  useWaiterCallSocket(callId)
+
+  const status = callStatus?.status ?? null
+
+  function persistCallId(id: string | null) {
+    setCallIdState(id)
+    if (id) sessionStorage.setItem(callStorageKey(tableId), id)
+    else sessionStorage.removeItem(callStorageKey(tableId))
+  }
+
+  function startCooldown() {
+    const until = Date.now() + COOLDOWN_MS
+    setCooldownUntilState(until)
+    sessionStorage.setItem(cooldownStorageKey(tableId), String(until))
+    persistCallId(null)
+  }
+
+  useEffect(() => {
+    if (status === 'completed' || status === 'declined') {
+      startCooldown()
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status])
+
+  useEffect(() => {
+    if (!cooldownUntil) return
+    const tick = () => {
+      const rem = Math.max(0, cooldownUntil - Date.now())
+      setRemaining(Math.ceil(rem / 1000))
+      if (rem <= 0) {
+        setCooldownUntilState(null)
+        sessionStorage.removeItem(cooldownStorageKey(tableId))
+      }
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [cooldownUntil, tableId])
+
+  async function handleCall() {
+    if (createWaiterCall.isPending) return
+    try {
+      const call = await createWaiterCall.mutateAsync({ restaurantId, tableId, tableNumber, tableName })
+      setWaiterCallStatus(call)
+      persistCallId(call.id)
+      toast({ variant: 'success', title: t('menu.waiterCall.sent') })
+    } catch {
+      toast({ variant: 'error', title: t('menu.waiterCall.error') })
+    }
+  }
+
+  if (cooldownUntil && remaining > 0) {
+    const mins = Math.floor(remaining / 60)
+    const secs = remaining % 60
+    return (
+      <div className="flex items-center gap-2 rounded-full px-5 py-3 bg-gray-500 text-white font-semibold shadow-xl opacity-80">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" aria-hidden="true">
+          <circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" />
+        </svg>
+        <span>{t('menu.waiterCall.cooldownLabel')} {mins}:{secs.toString().padStart(2, '0')}</span>
+      </div>
+    )
+  }
+
+  if (callId && status && status !== 'completed' && status !== 'declined') {
+    return (
+      <div
+        className="flex items-center gap-2 rounded-full px-5 py-3 text-white font-semibold shadow-xl"
+        style={{ backgroundColor: STATUS_COLORS[status] ?? '#6b7280' }}
+      >
+        {status === 'pending' && (
+          <svg className="h-4 w-4 animate-spin shrink-0" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z" />
+          </svg>
+        )}
+        <span>{t(`menu.waiterCall.status.${status}` as Parameters<typeof t>[0])}</span>
+      </div>
+    )
+  }
+
+  return (
+    <button
+      onClick={handleCall}
+      disabled={createWaiterCall.isPending}
+      aria-label={t('menu.waiterCall.buttonLabel')}
+      className="cursor-pointer flex items-center gap-2 rounded-full px-5 py-3 text-white font-semibold shadow-xl hover:opacity-90 transition-opacity focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-60"
+      style={{ backgroundColor: primaryColor }}
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 shrink-0" aria-hidden="true">
+        <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+        <line x1="6" y1="1" x2="6" y2="4" />
+        <line x1="10" y1="1" x2="10" y2="4" />
+        <line x1="14" y1="1" x2="14" y2="4" />
+      </svg>
+      {t('menu.waiterCall.button')}
+    </button>
+  )
+}
+
 function MenuContent() {
   const { slug } = useParams<{ slug: string }>()
+  const [searchParams] = useSearchParams()
+  const tableId = searchParams.get('tableId')
   const { data: menu, isLoading, isError } = useMenu(slug ?? '')
+  const { data: tableData } = useTableById(tableId)
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null)
@@ -451,7 +593,21 @@ function MenuContent() {
           primaryColor={primaryColor}
           accentColor={accentColor}
           slug={restaurant.slug}
+          tableIdFromUrl={tableId}
+          tableNumberFromUrl={tableData ? String(tableData.number) : null}
         />
+      )}
+
+      {tableId && tableData && restaurant.ordersEnabled && (
+        <div className="fixed z-40 bottom-24 left-6">
+          <WaiterCallButton
+            restaurantId={restaurant.id}
+            tableId={tableId}
+            tableNumber={tableData.number}
+            tableName={tableData.name}
+            primaryColor={primaryColor}
+          />
+        </div>
       )}
 
       {restaurant.ordersEnabled && restaurant.whatsappPhone && count > 0 && (

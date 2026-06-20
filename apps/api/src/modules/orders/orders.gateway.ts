@@ -32,10 +32,11 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
       return
     }
     try {
-      const payload = this.jwtService.verify<{ restaurantId: string }>(token)
-      client.join(`restaurant:${payload.restaurantId}`)
-    } catch {
+      const payload = this.jwtService.verify<{ sub: string }>(token)
+      client.join(`restaurant:${payload.sub}`)
+    } catch (err) {
       // Invalid token — allow connection for public order tracking
+      console.warn('[OrdersGateway] Token inválido, cliente não entrou no room do restaurante:', (err as Error).message)
     }
   }
 
@@ -45,6 +46,13 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
   handleTrackOrder(@MessageBody() orderId: string, @ConnectedSocket() client: Socket) {
     if (orderId && typeof orderId === 'string') {
       client.join(`order:${orderId}`)
+    }
+  }
+
+  @SubscribeMessage('track:waiterCall')
+  handleTrackWaiterCall(@MessageBody() callId: string, @ConnectedSocket() client: Socket) {
+    if (callId && typeof callId === 'string') {
+      client.join(`call:${callId}`)
     }
   }
 
@@ -58,5 +66,14 @@ export class OrdersGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   emitOrderStatusToCustomer(orderId: string, order: object) {
     this.server.to(`order:${orderId}`).emit('order:status', order)
+  }
+
+  emitWaiterCallCreated(restaurantId: string, call: object) {
+    this.server.to(`restaurant:${restaurantId}`).emit('waiterCall:created', call)
+  }
+
+  emitWaiterCallUpdated(restaurantId: string, call: object & { id: string }) {
+    this.server.to(`restaurant:${restaurantId}`).emit('waiterCall:updated', call)
+    this.server.to(`call:${call.id}`).emit('waiterCall:updated', call)
   }
 }

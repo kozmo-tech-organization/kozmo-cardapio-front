@@ -66,5 +66,17 @@
   "menu.cart.tableNumber": "Número de mesa",
   "menu.cart.tableNumberPlaceholder": "Ej: Mesa 5",
   "menu.cart.confirmOrder": "Confirmar pedido",
-  "menu.cart.orderPlaced": "¡Pedido realizado con éxito!"
+  "menu.cart.orderPlaced": "¡Pedido realizado con éxito!",
+  "menu.waiterCall.button": "Llamar al Mozo",
+  "menu.waiterCall.called": "¡Mozo llamado!",
+  "menu.waiterCall.buttonLabel": "Llamar al mozo a esta mesa",
+  "menu.waiterCall.sent": "¡Mozo llamado con éxito!",
+  "menu.waiterCall.error": "Error al llamar al mozo. Inténtalo de nuevo.",
+  "menu.waiterCall.status.pending": "Esperando al mozo...",
+  "menu.waiterCall.status.accepted": "¡El mozo ya viene!",
+  "menu.waiterCall.status.waiting": "Espere un momento",
+  "menu.waiterCall.status.completed": "¡Atendido! ✓",
+  "menu.waiterCall.status.declined": "No disponible en este momento",
+  "menu.waiterCall.callAgain": "Llamar de nuevo",
+  "menu.waiterCall.cooldownLabel": "Disponible en"
 }

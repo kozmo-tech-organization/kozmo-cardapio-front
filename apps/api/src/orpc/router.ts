@@ -6,6 +6,8 @@ import type { CategoriesService } from '../modules/categories/categories.service
 import type { PromotionsService } from '../modules/promotions/promotions.service'
 import type { OrdersService } from '../modules/orders/orders.service'
 import type { CouponsService } from '../modules/coupons/coupons.service'
+import type { TablesService } from '../modules/tables/tables.service'
+import type { WaiterCallsService } from '../modules/waiter-calls/waiter-calls.service'
 import { createAuthRouter } from './routers/auth.router'
 import { createRestaurantRouter } from './routers/restaurant.router'
 import { createProductsRouter } from './routers/products.router'
@@ -15,6 +17,8 @@ import { createCategoriesRouter } from './routers/categories.router'
 import { createPromotionsRouter } from './routers/promotions.router'
 import { createOrdersRouter } from './routers/orders.router'
 import { createCouponsRouter } from './routers/coupons.router'
+import { createTablesRouter } from './routers/tables.router'
+import { createWaiterCallsRouter } from './routers/waiter-calls.router'
 
 export interface RouterServices {
   authService: AuthService
@@ -25,6 +29,8 @@ export interface RouterServices {
   promotionsService: PromotionsService
   ordersService: OrdersService
   couponsService: CouponsService
+  tablesService: TablesService
+  waiterCallsService: WaiterCallsService
 }
 
 export function createAppRouter(services: RouterServices) {
@@ -38,6 +44,8 @@ export function createAppRouter(services: RouterServices) {
     reviews: createReviewsRouter(services.reviewsService),
     orders: createOrdersRouter(services.ordersService),
     coupons: createCouponsRouter(services.couponsService),
+    tables: createTablesRouter(services.tablesService),
+    waiterCalls: createWaiterCallsRouter(services.waiterCallsService),
   }
 }
 

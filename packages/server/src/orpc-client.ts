@@ -28,6 +28,11 @@ import type {
   UpdateCouponInput,
   ValidateCouponInput,
   ValidateCouponResult,
+  Table,
+  CreateTableInput,
+  WaiterCall,
+  CreateWaiterCallInput,
+  UpdateWaiterCallStatusInput,
 } from '@repo/schemas'
 import { getRpcUrl, getAuthHeaders } from './http-client'
 
@@ -104,6 +109,18 @@ export const orpcClient = {
     update: (input: { id: string } & UpdateCouponInput): Promise<Coupon> => rpc.coupons.update(input),
     delete: (input: { id: string }): Promise<{ success: boolean }> => rpc.coupons.delete(input),
     validate: (input: ValidateCouponInput): Promise<ValidateCouponResult> => rpc.coupons.validate(input),
+  },
+  tables: {
+    list: (): Promise<Table[]> => rpc.tables.list(),
+    create: (input: CreateTableInput): Promise<Table> => rpc.tables.create(input),
+    delete: (input: { id: string }): Promise<{ success: boolean }> => rpc.tables.delete(input),
+    getById: (input: { id: string }): Promise<Table> => rpc.tables.getById(input),
+  },
+  waiterCalls: {
+    create: (input: CreateWaiterCallInput): Promise<WaiterCall> => rpc.waiterCalls.create(input),
+    getById: (input: { id: string }): Promise<WaiterCall> => rpc.waiterCalls.getById(input),
+    list: (): Promise<WaiterCall[]> => rpc.waiterCalls.list(),
+    updateStatus: (input: UpdateWaiterCallStatusInput): Promise<WaiterCall> => rpc.waiterCalls.updateStatus(input),
   },
 }
 

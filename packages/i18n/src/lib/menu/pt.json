@@ -66,5 +66,17 @@
   "menu.cart.tableNumber": "Número da mesa",
   "menu.cart.tableNumberPlaceholder": "Ex: Mesa 5",
   "menu.cart.confirmOrder": "Confirmar pedido",
-  "menu.cart.orderPlaced": "Pedido realizado com sucesso!"
+  "menu.cart.orderPlaced": "Pedido realizado com sucesso!",
+  "menu.waiterCall.button": "Chamar Garçon",
+  "menu.waiterCall.called": "Garçon chamado!",
+  "menu.waiterCall.buttonLabel": "Chamar garçon para esta mesa",
+  "menu.waiterCall.sent": "Garçon chamado com sucesso!",
+  "menu.waiterCall.error": "Erro ao chamar garçon. Tente novamente.",
+  "menu.waiterCall.status.pending": "Aguardando garçon...",
+  "menu.waiterCall.status.accepted": "Garçon a caminho!",
+  "menu.waiterCall.status.waiting": "Aguarde um momento",
+  "menu.waiterCall.status.completed": "Atendido! ✓",
+  "menu.waiterCall.status.declined": "Não disponível no momento",
+  "menu.waiterCall.callAgain": "Chamar novamente",
+  "menu.waiterCall.cooldownLabel": "Disponível em"
 }

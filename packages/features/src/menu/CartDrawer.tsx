@@ -10,11 +10,13 @@ interface CheckoutModalProps {
   deliveryEnabled: boolean
   tableEnabled: boolean
   primaryColor: string
+  tableIdFromUrl: string | null
+  tableNumberFromUrl: string | null
   onClose: () => void
   onSuccess: (orderId: string) => void
 }
 
-function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, onClose, onSuccess }: CheckoutModalProps) {
+function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, tableIdFromUrl, tableNumberFromUrl, onClose, onSuccess }: CheckoutModalProps) {
   const { items, subtotal, total, discountAmount, appliedCoupon, setAppliedCoupon, clear } = useCart()
   const { t } = useTranslation()
   const createOrder = useCreateOrder()
@@ -27,7 +29,7 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
     phone: '',
     type: 'pickup' as 'pickup' | 'delivery',
     address: '',
-    tableNumber: '',
+    tableNumber: tableNumberFromUrl ?? '',
   })
 
   function setField(field: string, value: string) {
@@ -226,6 +228,7 @@ function CheckoutModal({ restaurantId, whatsappPhone, deliveryEnabled, tableEnab
               onChange={(e) => setField('tableNumber', e.target.value)}
               required
               placeholder={t('menu.cart.tableNumberPlaceholder')}
+              disabled={!!tableIdFromUrl}
             />
           )}
 
@@ -331,9 +334,11 @@ interface CartDrawerProps {
   primaryColor: string
   accentColor: string
   slug: string
+  tableIdFromUrl: string | null
+  tableNumberFromUrl: string | null
 }
 
-export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, accentColor, slug: _slug }: CartDrawerProps) {
+export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliveryEnabled, tableEnabled, primaryColor, accentColor, slug: _slug, tableIdFromUrl, tableNumberFromUrl }: CartDrawerProps) {
   const { items, removeItem, updateQuantity, subtotal, total, discountAmount, appliedCoupon, clear } = useCart()
   const { t } = useTranslation()
   const [checkoutOpen, setCheckoutOpen] = useState(false)
@@ -505,6 +510,8 @@ export function CartDrawer({ open, onClose, restaurantId, whatsappPhone, deliver
           deliveryEnabled={deliveryEnabled}
           tableEnabled={tableEnabled}
           primaryColor={primaryColor}
+          tableIdFromUrl={tableIdFromUrl}
+          tableNumberFromUrl={tableNumberFromUrl}
           onClose={() => setCheckoutOpen(false)}
           onSuccess={(orderId) => {
             setCheckoutOpen(false)

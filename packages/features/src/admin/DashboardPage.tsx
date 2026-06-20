@@ -1,5 +1,5 @@
 import { Link } from 'react-router'
-import { useCurrentRestaurant, useMenu } from '@repo/queries'
+import { useCurrentRestaurant, useMenu, useOrders, useWaiterCalls } from '@repo/queries'
 import { Card, CardContent, CardHeader, CardTitle } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'
 
@@ -31,6 +31,8 @@ function RatingBar({ label, count, max }: { label: string; count: number; max: n
 export function DashboardPage() {
   const { data: restaurant } = useCurrentRestaurant()
   const { data: menu } = useMenu(restaurant?.slug ?? '')
+  const { data: orders } = useOrders()
+  const { data: waiterCalls } = useWaiterCalls()
   const { t, lang } = useTranslation()
 
   const products = menu?.products ?? []
@@ -61,7 +63,12 @@ export function DashboardPage() {
       productName: products.find((p) => p.id === r.productId)?.name ?? '—',
     }))
 
+  const pendingOrders = (orders ?? []).filter((o) => o.status === 'pending')
+  const pendingWaiterCalls = (waiterCalls ?? []).filter((c) => c.status === 'pending')
+
   const dateLocale = lang === 'en' ? 'en-US' : lang === 'es' ? 'es-ES' : 'pt-BR'
+
+  const showNotificationsRow = pendingOrders.length > 0 || pendingWaiterCalls.length > 0
 
   return (
     <div className="space-y-8">
@@ -69,6 +76,79 @@ export function DashboardPage() {
         <h1 className="text-3xl font-bold">{t('admin.dashboard.welcome', { name: restaurant?.name ?? '' })}</h1>
         <p className="text-muted-foreground mt-1">{t('admin.dashboard.subtitle')}</p>
       </div>
+
+      {showNotificationsRow && (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {pendingOrders.length > 0 && (
+            <Card className="border-orange-200 bg-orange-50 dark:bg-orange-900/10 dark:border-orange-800">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="text-base text-orange-700 dark:text-orange-400 flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-orange-500" />
+                  </span>
+                  {t('admin.dashboard.pendingOrders')} ({pendingOrders.length})
+                </CardTitle>
+                <Link
+                  to="/admin/orders"
+                  className="text-xs text-orange-600 hover:underline dark:text-orange-400"
+                >
+                  {t('admin.dashboard.viewAll')}
+                </Link>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-2">
+                {pendingOrders.slice(0, 3).map((order) => (
+                  <div key={order.id} className="flex items-center justify-between text-sm">
+                    <span className="font-medium text-orange-900 dark:text-orange-200 truncate max-w-[60%]">
+                      {order.customerName}
+                    </span>
+                    <span className="text-orange-700 dark:text-orange-400 font-semibold">
+                      R$ {Number(order.total).toFixed(2)}
+                    </span>
+                  </div>
+                ))}
+                {pendingOrders.length > 3 && (
+                  <p className="text-xs text-orange-600 dark:text-orange-400">
+                    +{pendingOrders.length - 3} {t('admin.dashboard.more')}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {pendingWaiterCalls.length > 0 && (
+            <Card className="border-blue-200 bg-blue-50 dark:bg-blue-900/10 dark:border-blue-800">
+              <CardHeader className="pb-2 flex flex-row items-center justify-between">
+                <CardTitle className="text-base text-blue-700 dark:text-blue-400 flex items-center gap-2">
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500" />
+                  </span>
+                  {t('admin.dashboard.pendingWaiterCalls')} ({pendingWaiterCalls.length})
+                </CardTitle>
+                <Link
+                  to="/admin/waiter-calls"
+                  className="text-xs text-blue-600 hover:underline dark:text-blue-400"
+                >
+                  {t('admin.dashboard.viewAll')}
+                </Link>
+              </CardHeader>
+              <CardContent className="pt-0 space-y-2">
+                {pendingWaiterCalls.slice(0, 3).map((call) => (
+                  <div key={call.id} className="text-sm font-medium text-blue-900 dark:text-blue-200">
+                    {call.tableName ?? `${t('admin.waiterCalls.tableLabel')} ${call.tableNumber}`}
+                  </div>
+                ))}
+                {pendingWaiterCalls.length > 3 && (
+                  <p className="text-xs text-blue-600 dark:text-blue-400">
+                    +{pendingWaiterCalls.length - 3} {t('admin.dashboard.more')}
+                  </p>
+                )}
+              </CardContent>
+            </Card>
+          )}
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <Card>

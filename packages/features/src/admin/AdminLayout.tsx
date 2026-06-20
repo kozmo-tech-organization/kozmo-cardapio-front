@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Link, Outlet, useNavigate, useLocation } from 'react-router'
-import { useCurrentRestaurant, useLogout, useOrders } from '@repo/queries'
+import { useCurrentRestaurant, useLogout, useOrders, useWaiterCalls } from '@repo/queries'
 import { useOrdersSocket } from './useOrdersSocket'
+import { useWaiterCallsSocket } from './useWaiterCallsSocket'
 import { useTranslation, type Language } from '@repo/i18n'
 
 function hexToHsl(hex: string): string {
@@ -108,6 +109,31 @@ const NAV_KEYS = [
         <path d="M6 9.01V9" />
         <rect x="13" y="2" width="9" height="9" rx="1" />
         <path d="m16 6 1.5 1.5L20 5" />
+      </svg>
+    ),
+  },
+  {
+    to: '/admin/tables',
+    labelKey: 'admin.nav.tables',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true" focusable="false">
+        <rect x="3" y="3" width="18" height="7" rx="1" />
+        <path d="M3 10v8" />
+        <path d="M21 10v8" />
+        <path d="M3 14h18" />
+      </svg>
+    ),
+  },
+  {
+    to: '/admin/waiter-calls',
+    labelKey: 'admin.nav.waiterCalls',
+    icon: (
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4" aria-hidden="true" focusable="false">
+        <path d="M18 8h1a4 4 0 0 1 0 8h-1" />
+        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z" />
+        <line x1="6" y1="1" x2="6" y2="4" />
+        <line x1="10" y1="1" x2="10" y2="4" />
+        <line x1="14" y1="1" x2="14" y2="4" />
       </svg>
     ),
   },
@@ -238,8 +264,11 @@ export function AdminLayout() {
   }
 
   useOrdersSocket()
+  useWaiterCallsSocket()
   const { data: orders } = useOrders()
+  const { data: waiterCalls } = useWaiterCalls()
   const pendingCount = orders?.filter((o) => o.status === 'pending').length ?? 0
+  const pendingWaiterCallsCount = waiterCalls?.filter((c) => c.status === 'pending').length ?? 0
 
   const primaryColor = restaurant?.theme?.primaryColor || '#f97316'
   const primaryHsl = hexToHsl(primaryColor)
@@ -289,6 +318,11 @@ export function AdminLayout() {
               {item.to === '/admin/orders' && pendingCount > 0 && (
                 <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-white/30 px-1.5 text-xs font-bold text-white">
                   {pendingCount}
+                </span>
+              )}
+              {item.to === '/admin/waiter-calls' && pendingWaiterCallsCount > 0 && (
+                <span className="ml-auto flex h-5 min-w-5 items-center justify-center rounded-full bg-white/30 px-1.5 text-xs font-bold text-white">
+                  {pendingWaiterCallsCount}
                 </span>
               )}
             </Link>

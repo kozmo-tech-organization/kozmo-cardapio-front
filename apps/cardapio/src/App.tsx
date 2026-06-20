@@ -15,6 +15,8 @@ import {
   CalendarPage,
   CouponsPage,
   CustomersPage,
+  TablesPage,
+  WaiterCallsPage,
   MenuPage,
   PrintMenuPage,
   OrderTrackingPage,
@@ -57,6 +59,8 @@ export default function App() {
               <Route path="customers" element={<CustomersPage />} />
               <Route path="visualizar" element={<ViewMenuPage />} />
               <Route path="orders" element={<OrdersPage />} />
+              <Route path="tables" element={<TablesPage />} />
+              <Route path="waiter-calls" element={<WaiterCallsPage />} />
               <Route path="reports" element={<ReportsPage />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="settings" element={<RestaurantSettingsPage />} />

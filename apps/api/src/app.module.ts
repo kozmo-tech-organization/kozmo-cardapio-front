@@ -10,6 +10,8 @@ import { CategoriesModule } from './modules/categories/categories.module'
 import { PromotionsModule } from './modules/promotions/promotions.module'
 import { OrdersModule } from './modules/orders/orders.module'
 import { CouponsModule } from './modules/coupons/coupons.module'
+import { TablesModule } from './modules/tables/tables.module'
+import { WaiterCallsModule } from './modules/waiter-calls/waiter-calls.module'
 import { HealthController } from './health.controller'
 import { RpcMiddleware } from './orpc/rpc.middleware'
 
@@ -29,6 +31,8 @@ import { RpcMiddleware } from './orpc/rpc.middleware'
     PromotionsModule,
     OrdersModule,
     CouponsModule,
+    TablesModule,
+    WaiterCallsModule,
   ],
 })
 export class AppModule implements NestModule {

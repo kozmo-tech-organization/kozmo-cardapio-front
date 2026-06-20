@@ -19,8 +19,7 @@ export function useOrderById(id: string | null) {
     queryKey: ['order', id],
     queryFn: () => orpcClient.orders.getById({ id: id! }),
     enabled: !!id,
-    refetchOnWindowFocus: true,
-    staleTime: Infinity,
+    staleTime: 30_000,
   })
 }
 

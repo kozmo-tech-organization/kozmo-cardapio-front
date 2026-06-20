@@ -89,14 +89,27 @@ export function OrderTrackingPage() {
     if (!orderId) return
 
     const apiUrl = (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? 'http://localhost:3001'
-    const socket = io(apiUrl, { transports: ['websocket', 'polling'] })
+    const socket = io(apiUrl, {
+      forceNew: true,
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 2000,
+      reconnectionAttempts: 10,
+    })
     socketRef.current = socket
 
-    socket.on('connect', () => {
-      socket.emit('track:order', orderId)
+    const joinRoom = () => socket.emit('track:order', orderId)
+
+    socket.on('connect', joinRoom)
+    socket.io.on('reconnect', () => {
+      joinRoom()
+      queryClient.invalidateQueries({ queryKey: ['order', orderId] })
     })
 
-    socket.on('order:status', () => {
+    socket.on('order:status', (updatedOrder) => {
+      if (updatedOrder) {
+        queryClient.setQueryData(['order', orderId], updatedOrder)
+      }
       queryClient.invalidateQueries({ queryKey: ['order', orderId] })
     })
 

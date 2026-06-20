@@ -8,6 +8,6 @@ import { AuthModule } from '../auth/auth.module'
 @Module({
   imports: [TypeOrmModule.forFeature([Order]), AuthModule],
   providers: [OrdersService, OrdersGateway],
-  exports: [OrdersService],
+  exports: [OrdersService, OrdersGateway],
 })
 export class OrdersModule {}

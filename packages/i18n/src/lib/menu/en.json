@@ -66,5 +66,17 @@
   "menu.cart.tableNumber": "Table number",
   "menu.cart.tableNumberPlaceholder": "E.g.: Table 5",
   "menu.cart.confirmOrder": "Confirm order",
-  "menu.cart.orderPlaced": "Order placed successfully!"
+  "menu.cart.orderPlaced": "Order placed successfully!",
+  "menu.waiterCall.button": "Call Waiter",
+  "menu.waiterCall.called": "Waiter called!",
+  "menu.waiterCall.buttonLabel": "Call waiter to this table",
+  "menu.waiterCall.sent": "Waiter called successfully!",
+  "menu.waiterCall.error": "Error calling waiter. Please try again.",
+  "menu.waiterCall.status.pending": "Waiting for waiter...",
+  "menu.waiterCall.status.accepted": "Waiter is on the way!",
+  "menu.waiterCall.status.waiting": "Please wait a moment",
+  "menu.waiterCall.status.completed": "Attended! ✓",
+  "menu.waiterCall.status.declined": "Not available right now",
+  "menu.waiterCall.callAgain": "Call again",
+  "menu.waiterCall.cooldownLabel": "Available in"
 }

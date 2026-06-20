@@ -1,7 +1,7 @@
 import { useEffect, useRef, useReducer } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { io } from 'socket.io-client'
-import type { Order } from '@repo/schemas'
+import type { WaiterCall } from '@repo/schemas'
 import { useToast } from '@repo/ui'
 import { useTranslation } from '@repo/i18n'
 import { playNotificationBell } from './notificationSound'
@@ -11,9 +11,9 @@ const API_URL =
     ? (import.meta as unknown as { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL ?? 'http://localhost:3001'
     : 'http://localhost:3001'
 
-const ORDERS_KEY = ['orders']
+const WAITER_CALLS_KEY = ['waiterCalls']
 
-export function useOrdersSocket() {
+export function useWaiterCallsSocket() {
   const queryClient = useQueryClient()
   const { toast } = useToast()
   const { t } = useTranslation()
@@ -38,28 +38,28 @@ export function useOrdersSocket() {
       reconnectionAttempts: 10,
     })
 
-    socket.on('order:created', (order: Order) => {
+    socket.on('waiterCall:created', (call: WaiterCall) => {
       playNotificationBell()
       toastRef.current({
-        title: tRef.current('admin.orders.newOrderToast'),
-        description: order.customerName,
+        title: tRef.current('admin.waiterCalls.newCallToast'),
+        description: call.tableName ?? `${tRef.current('admin.waiterCalls.tableLabel')} ${call.tableNumber}`,
         variant: 'default',
       })
-      queryClient.setQueryData<Order[]>(ORDERS_KEY, (prev) => {
+      queryClient.setQueryData<WaiterCall[]>(WAITER_CALLS_KEY, (prev) => {
         if (!prev) return undefined
-        if (prev.some((o) => o.id === order.id)) return prev
-        return [order, ...prev]
+        if (prev.some((c) => c.id === call.id)) return prev
+        return [call, ...prev]
       })
-      queryClient.invalidateQueries({ queryKey: ORDERS_KEY })
+      queryClient.invalidateQueries({ queryKey: WAITER_CALLS_KEY })
       forceUpdate()
     })
 
-    socket.on('order:updated', (order: Order) => {
-      queryClient.setQueryData<Order[]>(ORDERS_KEY, (prev) => {
+    socket.on('waiterCall:updated', (call: WaiterCall) => {
+      queryClient.setQueryData<WaiterCall[]>(WAITER_CALLS_KEY, (prev) => {
         if (!prev) return undefined
-        return prev.map((o) => (o.id === order.id ? order : o))
+        return prev.map((c) => (c.id === call.id ? call : c))
       })
-      queryClient.invalidateQueries({ queryKey: ORDERS_KEY })
+      queryClient.invalidateQueries({ queryKey: WAITER_CALLS_KEY })
     })
 
     return () => { socket.disconnect() }
